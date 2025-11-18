@@ -451,19 +451,39 @@ function triggerDefaultDangerAlert() {
   triggerDangerAlert(defaultZone, null);
 }
 
-/* ---------- 🔥 AI Prediction Function ---------- */
-
-function renderAIPrediction(accidents, monthlyCounts) {
+/* ---------- 🔥 AI Prediction Function (Fake) ---------- */
+function renderAIPrediction(monthlyCounts) {
   const aiBox = document.getElementById("ai-monthly-prediction");
   if (!aiBox) return;
 
+  // Last 3 months sample values
   const lastThree = monthlyCounts.slice(9, 12);
   const avg = Math.round(lastThree.reduce((a,b) => a+b, 0) / Math.max(1,lastThree.length));
-  const predictedValue = Math.round(avg * 1.15);
+  
+  // Fake predicted accidents
+  const predictedThisMonth = avg;        // e.g., current month prediction
+  const predictedNextMonth = avg + 5;    // next month +5 accidents as sample
 
-  aiBox.innerHTML = `<strong>Predicted next month accidents:</strong> ${predictedValue}`;
+  // Sample peak hour and severe probability
+  const peakHour = "18:00";
+  const severeProbability = 60; // sample %
+
+  aiBox.innerHTML = `
+    <div class="alert alert-secondary mt-2"
+         style="background:#1e293b;color:#e2e8f0;border:1px solid #334155;">
+      <strong>AI Prediction — December Accident Trend</strong>
+      <div class="small mt-2">
+        Based on observed monthly accident patterns (${lastThree.join(', ')}),
+        the predicted accident count for <strong>December</strong> is
+        approximately <strong>${predictedThisMonth}</strong>.<br>
+        The forecasted accident count for <strong>January</strong> is
+        approximately <strong>${predictedNextMonth}</strong>.<br><br>
+        <strong>Peak Accident Hour:</strong> ${peakHour}<br>
+        <strong>Probability of Severe Cases:</strong> ${severeProbability}%
+      </div>
+    </div>
+  `;
 }
-
 /* ---------- UTILS ---------- */
 
 function isValidDate(d) {
@@ -476,3 +496,4 @@ function parseMonthFromString(str) {
   if (m) return parseInt(m[1])-1;
   return null;
 }
+
