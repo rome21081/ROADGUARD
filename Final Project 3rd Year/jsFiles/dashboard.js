@@ -452,20 +452,22 @@ function triggerDefaultDangerAlert() {
 }
 
 /* ---------- 🔥 AI Prediction Function (Fake) ---------- */
-function renderAIPrediction(monthlyCounts) {
+/* ---------- 🔥 AI Prediction Function (Fake) ---------- */
+function renderAIPrediction() {
   const aiBox = document.getElementById("ai-monthly-prediction");
   if (!aiBox) return;
 
-  // Last 3 months sample values
-  const lastThree = monthlyCounts.slice(9, 12);
-  const avg = Math.round(lastThree.reduce((a,b) => a+b, 0) / Math.max(1,lastThree.length));
-  
-  // Fake predicted accidents
-  const predictedThisMonth = avg;        // e.g., current month prediction
-  const predictedNextMonth = avg + 5;    // next month +5 accidents as sample
+  // Last three months accident counts
+  const lastThree = [7, 2, 25]; // Sep, Oct, Nov
 
-  // Sample peak hour and severe probability
+  // Fake predicted accidents
+  const predictedDecember = Math.round(lastThree.reduce((a,b) => a+b,0) / lastThree.length); // average ~11
+  const predictedJanuary = predictedDecember + 5; // sample next month prediction
+
+  // Fake peak accident hour
   const peakHour = "18:00";
+
+  // Fake probability of severe cases
   const severeProbability = 60; // sample %
 
   aiBox.innerHTML = `
@@ -475,15 +477,16 @@ function renderAIPrediction(monthlyCounts) {
       <div class="small mt-2">
         Based on observed monthly accident patterns (${lastThree.join(', ')}),
         the predicted accident count for <strong>December</strong> is
-        approximately <strong>${predictedThisMonth}</strong>.<br>
+        approximately <strong>${predictedDecember}</strong>.<br>
         The forecasted accident count for <strong>January</strong> is
-        approximately <strong>${predictedNextMonth}</strong>.<br><br>
+        approximately <strong>${predictedJanuary}</strong>.<br><br>
         <strong>Peak Accident Hour:</strong> ${peakHour}<br>
         <strong>Probability of Severe Cases:</strong> ${severeProbability}%
       </div>
     </div>
   `;
 }
+
 /* ---------- UTILS ---------- */
 
 function isValidDate(d) {
@@ -496,4 +499,5 @@ function parseMonthFromString(str) {
   if (m) return parseInt(m[1])-1;
   return null;
 }
+
 
