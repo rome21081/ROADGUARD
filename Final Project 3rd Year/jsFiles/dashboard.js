@@ -1,270 +1,4 @@
-/*
-  dashboard.js
-  - Full dashboard logic + dynamic danger-zone detection + user-location alert
-  - Uses your global getData(endpoint) defined in api.js where appropriate
-  - Danger radius: 200 meters (user choice B)
-*/
-
-'use strict';
-
-let monthlyChart = null;
-let severityChart = null;
-let vehicleChart = null;
-let lightChart = null;
-
-let userWatchId = null;           // geolocation watch id
-const DANGER_RADIUS_METERS = 200; // user choice B
-
-// Keep a cached list of computed danger zones (populated on each refresh)
-let computedDangerZones = []; // [{ name, lat, lng, severeCount, totalCount, probability }]
-
-document.addEventListener("DOMContentLoaded", async () => {
-  await refreshAll();
-  setInterval(refreshAll, 15000);
-  // Ask user for location (popup) after initial load (non-blocking)
-  setTimeout(askLocationPermission, 1000);
-});
-
-async function refreshAll() {
-  try {
-    // Try to fetch from your local JSON for development; fallback to API wrapper if available
-    let accidentsResult;
-    try {
-      const response = await fetch('accident.json');
-      accidentsResult = await response.json();
-    } catch (e) {
-      // fallback to API if fetch fails (api.js should provide getData)
-      if (typeof getData === 'function') {
-        accidentsResult = await getData('accident_api.php');
-      } else {
-        console.error("No accident.json and no getData available.", e);
-        accidentsResult = [];
-      }
-    }
-
-    const accidents = normalizeAccidentResponse(accidentsResult);
-    buildSummaryFromAccidents(accidents);
-    buildChartsFromAccidents(accidents);
-    renderRecentReports(accidents.slice(0, 12));
-
-    // Build danger zones dynamically from accidents and display list
-    computedDangerZones = buildDangerZonesFromAccidents(accidents);
-    renderDangerZoneList(computedDangerZones);
-
-  } catch (err) {
-    console.error("Error refreshing data:", err);
-  }
-}
-
-/* ---------- Helpers ---------- */
-
-function normalizeAccidentResponse(res) {
-  if (!res) return [];
-  if (Array.isArray(res)) return res;
-  if (res.success && Array.isArray(res.data)) return res.data;
-  if (res.success && Array.isArray(res.accidents)) return res.accidents;
-  if (res.success && Array.isArray(res.records)) return res.records;
-  if (res.accident_id && res.case_number) return [res];
-  for (const k in res) if (Array.isArray(res[k])) return res[k];
-  return [];
-}
-
-function buildSummaryFromAccidents(accidents) {
-  const totalAccidents = accidents.length;
-  const totalCasualties = 57; // sample fixed value
-  const severeCases = accidents.filter(a =>
-    ['severe','critical'].includes((a.severity || '').toLowerCase())
-  ).length;
-
-  const activeZones = [...new Set(accidents.filter(a => {
-    const s = (a.severity || '').toLowerCase();
-    return ['severe','critical','moderate'].includes(s);
-  }).map(a => a.address || a.location || a.type_name || 'Unknown'))].length;
-
-  document.getElementById('totalAccidents').innerText = totalAccidents;
-  document.getElementById('totalCasualties').innerText = totalCasualties;
-  document.getElementById('severeCases').innerText = severeCases;
-  document.getElementById('activeZones').innerText = activeZones;
-}
-
-function buildChartsFromAccidents(accidents) {
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const monthlyCounts = Array(12).fill(0);
-
-  accidents.forEach(a => {
-    const dt = new Date(a.accident_date || a.created_at || a.date || null);
-    if (isValidDate(dt)) monthlyCounts[dt.getMonth()]++;
-    else {
-      const parsedMonth = parseMonthFromString(a.accident_date || a.created_at);
-      if (parsedMonth !== null) monthlyCounts[parsedMonth]++;
-    }
-  });
-
-  // Severity distribution
-  const severityCounts = { severe:0, moderate:0, minor:0, unknown:0 };
-  accidents.forEach(a => {
-    const s = (a.severity || 'unknown').toLowerCase();
-    if (s.includes('sev') || s.includes('crit')) severityCounts.severe++;
-    else if (s.includes('mod')) severityCounts.moderate++;
-    else if (s.includes('min')) severityCounts.minor++;
-    else severityCounts.unknown++;
-  });
-
-  // Vehicle types
-  const vehicleMap = {};
-  accidents.forEach(a => {
-    if (Array.isArray(a.vehicles) && a.vehicles.length > 0) {
-      a.vehicles.forEach(v => {
-        const key = (v.type_name || v.vehicle_type_name || 'Unknown').trim();
-        vehicleMap[key] = (vehicleMap[key] || 0) + (Number(a.casualties || a.number_of_casualties || 1));
-      });
-    } else {
-      const key = (a.vehicle_type_name || 'Unknown').trim();
-      vehicleMap[key] = (vehicleMap[key] || 0) + (Number(a.casualties || a.number_of_casualties || 1));
-    }
-  });
-  const vehicleLabels = Object.keys(vehicleMap);
-  const vehicleValues = Object.values(vehicleMap);
-
-  // Light conditions
-  let am = 0, pm = 0;
-  accidents.forEach(a => {
-    const dt = new Date(a.accident_date || a.created_at || a.date || null);
-    if (isValidDate(dt)) {
-      const h = dt.getHours();
-      if (h >= 6 && h < 18) am++;
-      else pm++;
-    }
-  });
-
-  // Draw monthly chart
-  const ctxMonthly = document.getElementById('monthlyTrend').getContext('2d');
-  if (monthlyChart) monthlyChart.destroy();
-  monthlyChart = new Chart(ctxMonthly, {
-    type: 'line',
-    data: {
-      labels: months,
-      datasets: [{
-        label:'Accidents',
-        data: monthlyCounts,
-        backgroundColor:'transparent',
-        borderColor:'#fb7a8e',
-        borderWidth:2,
-        pointRadius:3,
-        lineTension:0.2
-      }]
-    },
-    options: {
-      scales: { yAxes:[{ ticks:{ beginAtZero:true } }] },
-      legend:{ display:false },
-      responsive:true,
-      maintainAspectRatio:false
-    }
-  });
-
-  // Render AI Prediction (also computes peak hour & severe probability for chosen zone)
-  renderAIPrediction(accidents, monthlyCounts);
-
-  // Severity chart
-  const ctxSeverity = document.getElementById('severityPie').getContext('2d');
-  if (severityChart) severityChart.destroy();
-  severityChart = new Chart(ctxSeverity, {
-    type: 'doughnut',
-    data: {
-      labels:['Severe','Moderate','Minor','Unknown'],
-      datasets:[{
-        data:[
-          severityCounts.severe,
-          severityCounts.moderate,
-          severityCounts.minor,
-          severityCounts.unknown
-        ],
-        backgroundColor:['#d9534f','#f0ad4e','#5cb85c','#6b7280']
-      }]
-    },
-    options:{ responsive:true, maintainAspectRatio:false }
-  });
-
-  // Vehicle chart
-  const ctxVehicle = document.getElementById('vehicleChart').getContext('2d');
-  if (vehicleChart) vehicleChart.destroy();
-  vehicleChart = new Chart(ctxVehicle, {
-    type: 'bar',
-    data: {
-      labels: vehicleLabels,
-      datasets: [{
-        label:'Accidents',
-        data: vehicleValues,
-        backgroundColor: ['#ffae00ff','#f74600ff','#6196FE','#A9B5FF','#031B89']
-      }]
-    },
-    options: {
-      legend:{ display:false },
-      scales:{ yAxes:[{ ticks:{ beginAtZero:true } }] },
-      responsive:true
-    }
-  });
-
-  // Light chart
-  const ctxLight = document.getElementById('lightChart').getContext('2d');
-  if (lightChart) lightChart.destroy();
-  lightChart = new Chart(ctxLight, {
-    type:'bar',
-    data:{ labels:['AM','PM'], datasets:[{ label:'Incidents', data:[am,pm], backgroundColor:['#6196FE','#fb7a8e'] }]},
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      legend: { display: false }
-    }
-  });
-}
-
-function renderRecentReports(accidents) {
-  const container = document.getElementById('recentReports');
-  container.innerHTML = '';
-  if (!accidents || accidents.length === 0) {
-    container.innerHTML = '<div class="text-muted small">No recent reports available.</div>';
-    return;
-  }
-
-  const html = accidents.map(a => {
-    const location = a.address || a.location || a.type_name || 'Unknown location';
-    const time = a.accident_date || a.created_at || '';
-    const severity = (a.severity || 'unknown').toLowerCase();
-    const severityBadge =
-      severity.includes('sev') || severity.includes('crit') ? 'badge-severe' :
-      severity.includes('mod') ? 'badge-moderate' : 'badge-minor';
-
-    const desc = a.description
-      ? (a.description.length > 140 ? a.description.slice(0,140) + '...' : a.description)
-      : '';
-
-    return `
-      <div class="list-item">
-        <div style="min-width:48px">
-          <img src="${a.image || 'https://via.placeholder.com/48'}"
-               width="48" height="48" class="rounded-pill" alt="report">
-        </div>
-        <div style="flex:1">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <strong style="color:#e6edf6">${location}</strong>
-              <div class="small text-muted">${time}</div>
-            </div>
-            <div>
-              <span class="${severityBadge} badge">${(a.severity || 'Unknown').toUpperCase()}</span>
-            </div>
-          </div>
-          <div class="small text-muted mt-1">${desc}</div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  container.innerHTML = html;
-}
-
-/* ---------- DANGER ZONE BUILDING & RENDERING ---------- */
+/* ---------- DANGER ZONE BUILDING & RENDERING (UPDATED) ---------- */
 
 /**
  * buildDangerZonesFromAccidents
@@ -277,15 +11,8 @@ function renderRecentReports(accidents) {
  */
 function buildDangerZonesFromAccidents(accidents) {
   if (!Array.isArray(accidents) || accidents.length === 0) {
-    // fallback: include Barangay San Fabian center if no data
-    return [{
-      name: "Barangay San Fabian, Municipality of Echague, Province of Isabela",
-      lat: 16.7060,
-      lng: 121.6750,
-      severeCount: 5,
-      totalCount: 5,
-      probability: 100
-    }];
+    // No accidents at all, return empty list (no fake San Fabian)
+    return [];
   }
 
   const groups = {}; // key -> { latSum, lngSum, count, severeCount, samples:[] }
@@ -294,8 +21,10 @@ function buildDangerZonesFromAccidents(accidents) {
     const key = (a.address || a.location || a.type_name || 'Unknown location').trim();
     if (!groups[key]) groups[key] = { latSum:0, lngSum:0, count:0, severeCount:0, samples:[] };
 
-    const lat = parseFloat(a.latitude || a.lat || a.lng_lat || a.latlng?.lat || 0) || 0;
-    const lng = parseFloat(a.longitude || a.lng || a.lng_lat || a.latlng?.lng || 0) || 0;
+    const lat = parseFloat(a.latitude || a.lat || a.latlng?.lat || 0) || 0;
+    const lng = parseFloat(a.longitude || a.lng || a.latlng?.lng || 0) || 0;
+    if (!lat || !lng) return; // skip if no coordinates
+
     groups[key].latSum += lat;
     groups[key].lngSum += lng;
     groups[key].count += 1;
@@ -307,44 +36,25 @@ function buildDangerZonesFromAccidents(accidents) {
     }
   });
 
-  const zones = Object.entries(groups).map(([name, v]) => {
-    // If no lat/lng available, skip unless this is a target name (San Fabian).
-    let lat = v.latSum / Math.max(1, v.count);
-    let lng = v.lngSum / Math.max(1, v.count);
-
-    // fallback to known san fabian coordinates if name includes san fabian
-    if ((!lat || !lng) && name.toLowerCase().includes('san fabian')) {
-      lat = 16.7060; lng = 121.6750;
-    }
-
-    const prob = Math.round((v.severeCount / Math.max(1, v.count)) * 100);
-    return {
-      name,
-      lat,
-      lng,
-      severeCount: v.severeCount,
-      totalCount: v.count,
-      probability: prob
-    };
-  });
+  const zones = Object.entries(groups)
+    .filter(([_, v]) => v.count > 0) // skip locations with no coords
+    .map(([name, v]) => {
+      const lat = v.latSum / v.count;
+      const lng = v.lngSum / v.count;
+      const prob = Math.round((v.severeCount / Math.max(1, v.count)) * 100);
+      return {
+        name,
+        lat,
+        lng,
+        severeCount: v.severeCount,
+        totalCount: v.count,
+        probability: prob
+      };
+    });
 
   // Sort by severeCount desc and return top 5
   zones.sort((a,b) => b.severeCount - a.severeCount);
-  const top = zones.slice(0, 5);
-
-  // If the top list is empty (no coords), ensure Barangay San Fabian is present as primary
-  if (top.length === 0 || !top.some(z => z.name.toLowerCase().includes('san fabian'))) {
-    top.unshift({
-      name: "Barangay San Fabian, Municipality of Echague, Province of Isabela",
-      lat: 16.7060,
-      lng: 121.6750,
-      severeCount: 5,
-      totalCount: 5,
-      probability: 100
-    });
-  }
-
-  return top;
+  return zones.slice(0, 5);
 }
 
 /* renderDangerZoneList - show top danger zones in the dashboard list */
@@ -357,8 +67,7 @@ function renderDangerZoneList(zones) {
     return;
   }
 
-  const html = zones.map((zone, i) => {
-    // color by severity count
+  const html = zones.map(zone => {
     const cls = zone.severeCount >= 5 ? 'bg-danger' : zone.severeCount >= 3 ? 'bg-warning' : 'bg-info';
     const reason = zone.totalCount > 1 ? `${zone.totalCount} incidents reported` : `1 incident reported`;
     return `
@@ -373,16 +82,14 @@ function renderDangerZoneList(zones) {
   box.innerHTML = html;
 }
 
-/* ---------- 🔥 LOCATION & ALERT LOGIC ---------- */
+/* ---------- 🔥 LOCATION & ALERT LOGIC (UPDATED) ---------- */
 
-/* Ask user for permission (simple confirm) then start watching position */
 function askLocationPermission() {
   if (!navigator.geolocation) {
     console.log("Geolocation not supported by browser.");
     return;
   }
 
-  // Ask once — use confirm to keep it simple and inline (you can change to custom modal)
   const allow = confirm("Allow the system to access your location for safety alerts?");
   if (!allow) return;
 
@@ -395,43 +102,24 @@ function askLocationPermission() {
   });
 }
 
-/* Called whenever browser returns user location */
 function onLocationSuccess(position) {
   const userLat = position.coords.latitude;
   const userLng = position.coords.longitude;
 
-  // Check against computed danger zones list
   if (!Array.isArray(computedDangerZones) || computedDangerZones.length === 0) return;
 
-  // iterate top zones (already sorted by severity)
+  // Check for real danger zones only
   for (const zone of computedDangerZones) {
-    if (!zone.lat || !zone.lng) continue;
+    if (!zone.lat || !zone.lng || zone.severeCount < 1) continue; // skip invalid/fake zones
+
     const distance = haversineDistanceMeters(userLat, userLng, zone.lat, zone.lng);
-    // debug
-    // console.log("Distance to", zone.name, "=", Math.round(distance), "m");
     if (distance <= DANGER_RADIUS_METERS) {
-      // show alert for the FIRST matched (highest severity first)
       triggerDangerAlert(zone, Math.round(distance));
-      // break to avoid repeated alerts for multiple zones at once
-      break;
+      break; // only show first matching zone
     }
   }
 }
 
-/* Stop watching (call closeDangerModal which also clears display) */
-function stopWatchingUser() {
-  if (userWatchId !== null && navigator.geolocation) {
-    navigator.geolocation.clearWatch(userWatchId);
-    userWatchId = null;
-  }
-}
-
-/* Location error handler */
-function onLocationError(err) {
-  console.warn("Location error:", err && err.message ? err.message : err);
-}
-
-/* Haversine distance in meters */
 function haversineDistanceMeters(lat1, lon1, lat2, lon2) {
   const R = 6371e3; // meters
   const toRad = x => x * Math.PI / 180;
@@ -445,7 +133,6 @@ function haversineDistanceMeters(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-/* Show modal + play sound; include zone details */
 function triggerDangerAlert(zone, distanceMeters) {
   const modal = document.getElementById('dangerZoneModal');
   const sound = document.getElementById('dangerAlertSound');
@@ -453,89 +140,20 @@ function triggerDangerAlert(zone, distanceMeters) {
   const detailsEl = document.getElementById('dangerZoneDetails');
 
   if (!modal || !sound || !nameEl || !detailsEl) return;
-
-  // Prevent multiple repeated popups if already visible
   if (modal.style.display === 'flex') return;
 
   nameEl.innerText = zone.name;
-  detailsEl.innerText = `Distance: ${Math.round(distanceMeters)} m — Severity probability: ${zone.probability}% ( ${zone.severeCount}/${zone.totalCount} severe )`;
+  detailsEl.innerText = `Distance: ${distanceMeters} m — Severity probability: ${zone.probability}% ( ${zone.severeCount}/${zone.totalCount} severe )`;
 
   modal.style.display = 'flex';
-  // Attempt to play sound (may be blocked until user interacts with page)
+
   const playPromise = sound.play();
   if (playPromise && typeof playPromise.then === 'function') {
-    playPromise.catch(() => {
-      // ignore play error (browser may block auto-play)
-    });
+    playPromise.catch(() => { /* ignore play error */ });
   }
 }
 
-/* Close modal function (user dismisses) */
 function closeDangerModal() {
   const modal = document.getElementById('dangerZoneModal');
   if (modal) modal.style.display = 'none';
-  // stop watching if you want to stop after user acknowledges (optional)
-  // stopWatchingUser();
-}
-
-/* ---------- 🔥 AI Prediction Function (Formal + Extra Metrics) ---------- */
-function renderAIPrediction(accidents, monthlyCounts) {
-  const aiBox = document.getElementById("ai-monthly-prediction");
-  if (!aiBox) return;
-
-  const lastThree = monthlyCounts.slice(9, 12); // Oct-Nov-Dec
-  const avg = Math.round(lastThree.reduce((a,b) => a+b, 0) / Math.max(1,lastThree.length));
-  const predictedValue = Math.round(avg * 1.12);
-  const nextMonthPrediction = predictedValue + 5; // sample
-
-  // Compute hourly accident counts to find peak hour
-  const hourlyCounts = Array(24).fill(0);
-  accidents.forEach(a => {
-    const dt = new Date(a.accident_date || a.created_at || a.date || null);
-    if (isValidDate(dt)) {
-      hourlyCounts[dt.getHours()]++;
-    }
-  });
-  const maxHourVal = Math.max(...hourlyCounts);
-  let peakHour24 = hourlyCounts.indexOf(maxHourVal);
-  if (peakHour24 === -1) peakHour24 = 11; // fallback
-  let peakHour12 = ((peakHour24 + 11) % 12) + 1;
-  let ampm = peakHour24 >= 12 ? 'PM' : 'AM';
-  const peakHour = `${peakHour12}:00 ${ampm}`;
-
-  // Probability of severe cases in Barangay San Fabian (match by name)
-  const sanFabianSevere = accidents.filter(a =>
-    (a.address || '').toLowerCase().includes('san fabian') &&
-    ['severe','critical','fatal'].includes((a.severity || '').toLowerCase())
-  ).length;
-  const sanFabianTotal = accidents.filter(a => (a.address || '').toLowerCase().includes('san fabian')).length || 1;
-  const severeProbability = Math.round((sanFabianSevere / sanFabianTotal) * 100);
-
-  aiBox.innerHTML = `
-    <div class="alert alert-secondary mt-2"
-         style="background:#1e293b;color:#e2e8f0;border:1px solid #334155;">
-      <strong>AI Prediction — December Accident Trend</strong>
-      <div class="small mt-2">
-        Based on observed monthly patterns (${lastThree.join(', ')}),
-        adjusted for December’s higher traffic (+12%),
-        the predicted accident count for <strong>December</strong> is
-        approximately <strong>${predictedValue}</strong>.<br>
-        Forecast for <strong>January</strong>: ~<strong>${nextMonthPrediction}</strong> accidents.<br><br>
-        <strong>Peak Accident Hour:</strong> ${peakHour}<br>
-        <strong>Probability of Severe Cases (Barangay San Fabian, Echague, Isabela):</strong> ${severeProbability}%
-      </div>
-    </div>
-  `;
-}
-
-/* ---------- Utility helpers ---------- */
-function isValidDate(d) { return d instanceof Date && !isNaN(d); }
-function parseMonthFromString(str) {
-  if (!str || typeof str !== 'string') return null;
-  const m = str.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if (m) {
-    const monthIndex = parseInt(m[2],10) - 1;
-    return (monthIndex >= 0 && monthIndex < 12) ? monthIndex : null;
-  }
-  return null;
 }
