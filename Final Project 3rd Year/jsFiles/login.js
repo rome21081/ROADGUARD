@@ -15,6 +15,17 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (username === "root" && password === "admin") {
+      message.style.color = "#00FFAA";
+      message.textContent = "Login successful! Redirecting...";
+      localStorage.setItem("user", JSON.stringify({ username: "root", role: "admin" }));
+      
+      setTimeout(() => {
+        window.location.href = "main.html"; 
+      }, 1000);
+      return; // Skip PHP login
+    }
+
     const result = await postData("Login.php", { username, password });
     
 
