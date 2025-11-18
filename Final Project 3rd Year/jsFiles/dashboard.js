@@ -56,6 +56,17 @@ async function refreshAll() {
   }
 }
 
+// Force fake danger zone for testing
+computedDangerZones.unshift({
+  name: "Echague-Poblacion Road, Barangay San Fabian, Echague, Isabela (Near ISU Echague)",
+  lat: 16.7065,   // approximate latitude
+  lng: 121.6760,  // approximate longitude
+  severeCount: 5,
+  totalCount: 5,
+  probability: 100,
+});
+
+
 /* ---------- Helpers ---------- */
 
 function normalizeAccidentResponse(res) {
