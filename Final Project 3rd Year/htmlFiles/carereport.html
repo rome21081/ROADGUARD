@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patient Care Report</title>
+    <link rel="stylesheet" href="../cssFiles/carereport.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="top-bar">
+    <button onclick="goBack()">← Back to Dashboard</button>
+</div>
+<h1>Patient Care Report</h1>
+
+<form id="patientForm">
+
+
+<table>
+<tr class="section-title"><td colspan="4">Section 1: Pre-care information</td></tr>
+
+<tr>
+<td>Incident date:</td>
+<td><input type="date" name="incident_date"></td>
+<td>Incident number:</td>
+<td><input type="text" name="incident_number"></td>
+</tr>
+
+<tr>
+<td>Incident address:</td>
+<td><input type="text" name="incident_address"></td>
+<td>Incident city:</td>
+<td><input type="text" name="incident_city"></td>
+</tr>
+
+<tr>
+<td>Incident state:</td>
+<td><input type="text" name="incident_state"></td>
+<td>Area/zip code:</td>
+<td><input type="text" name="zip_code"></td>
+</tr>
+
+<tr>
+<td>Incidence location type:</td>
+<td colspan="3"><input type="text" name="location_type"></td>
+</tr>
+</table>
+
+
+<table>
+<tr class="section-title"><td colspan="4">Section 2: Emergency services</td></tr>
+
+<tr>
+<td colspan="2">
+<label><input type="checkbox" name="dispatch" value="No"> No</label><br>
+<label><input type="checkbox" name="dispatch" value="Pre-arrival by bystanders"> Pre-arrival by bystanders</label><br>
+<label><input type="checkbox" name="dispatch" value="On-arrival by emergency services"> On-arrival by emergency services</label>
+</td>
+
+<td colspan="2">
+Dispatch details:
+<textarea name="dispatch_details"></textarea>
+</td>
+</tr>
+
+<tr>
+<td colspan="4">
+Chief complaint:
+<textarea name="chief_complaint"></textarea>
+</td>
+</tr>
+
+<tr>
+<td>Dispatch vehicle number:</td>
+<td><input type="text" name="vehicle_number"></td>
+<td>Officer name:</td>
+<td><input type="text" name="officer_name"></td>
+</tr>
+
+<tr>
+<td><input type="text" name="officer_signature"></td>
+<td>Date:</td>
+<td><input type="date" name="officer_date"></td>
+</tr>
+</table>
+
+
+<table>
+<tr class="section-title"><td colspan="4">Section 3: Patient information</td></tr>
+
+<tr>
+<td>Name:</td>
+<td colspan="3"><input type="text" name="patient_name"></td>
+</tr>
+
+<tr>
+<td>Date of birth:</td>
+<td><input type="date" name="dob"></td>
+<td>Age:</td>
+<td><input type="number" name="age"></td>
+</tr>
+
+<tr>
+<td>Gender:</td>
+<td><input type="text" name="gender"></td>
+<td>SSN:</td>
+<td><input type="text" name="ssn"></td>
+</tr>
+</table>
+
+
+<table>
+<tr class="section-title"><td colspan="4">Section 4: Patient health status</td></tr>
+
+<tr>
+<td>Medical history:</td>
+<td colspan="3"><textarea name="history"></textarea></td>
+</tr>
+
+<tr>
+<td>Medications:</td>
+<td><textarea name="medications"></textarea></td>
+<td>Allergies:</td>
+<td><textarea name="allergies"></textarea></td>
+</tr>
+
+<tr>
+<td>Chief complaint:</td>
+<td><textarea name="patient_complaint"></textarea></td>
+<td>Notes:</td>
+<td><textarea name="notes"></textarea></td>
+</tr>
+</table>
+
+
+<table>
+<tr class="section-title"><td colspan="4">Section 5: Vital signs</td></tr>
+
+<tr>
+<td>Blood pressure:</td>
+<td><input type="text" name="blood_pressure"></td>
+<td>Pulse:</td>
+<td><input type="number" name="pulse"></td>
+</tr>
+
+<tr>
+<td>Respiration:</td>
+<td><input type="text" name="respiration"></td>
+<td>Notes:</td>
+<td><textarea name="vital_notes"></textarea></td>
+</tr>
+</table>
+
+
+<table>
+<tr class="section-title"><td colspan="4">Section 6: Physical examination</td></tr>
+
+<tr>
+<td colspan="4">
+<label><input type="radio" name="injury_present" value="Yes"> Yes</label>
+<label><input type="radio" name="injury_present" value="No"> No</label>
+</td>
+</tr>
+
+<tr>
+<td>Cause of injury:</td>
+<td colspan="3"><textarea name="injury_cause"></textarea></td>
+</tr>
+</table>
+
+
+<table>
+<tr class="section-title"><td colspan="4">Section 7: Diagnosis</td></tr>
+
+<tr>
+<td>Diagnosis:</td>
+<td colspan="3"><textarea name="diagnosis"></textarea></td>
+</tr>
+</table>
+
+
+<table>
+<tr class="section-title"><td colspan="4">Section 8: Treatment</td></tr>
+
+<tr>
+<td>Treatment:</td>
+<td colspan="3"><textarea name="treatment"></textarea></td>
+</tr>
+
+<tr>
+<td>Medication:</td>
+<td colspan="3"><textarea name="medication"></textarea></td>
+</tr>
+</table>
+
+
+<table>
+<tr class="section-title"><td colspan="4">Section 9: Summary</td></tr>
+
+<tr>
+<td>Summary:</td>
+<td colspan="3"><textarea name="summary"></textarea></td>
+</tr>
+
+<tr>
+<td>Recommendations:</td>
+<td colspan="3"><textarea name="recommendations"></textarea></td>
+</tr>
+</table>
+
+<div class="btn-container">
+<button type="button" onclick="saveReport()">Save Report</button>
+</div>
+
+</form>
+</div>
+
+<script src="../jsFiles/carereport.js"></script>
+
+<script>
+function goBack() {
+    window.location.href = "../htmlFiles/main.html";
+}
+</script>
+
+
+</body>
+</html>
