@@ -2,46 +2,89 @@
 <html>
 <head>
     <title>Patient Care Report</title>
+
     <link rel="stylesheet" href="../cssFiles/carereport.css">
+
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 </head>
 <body>
 
 <div class="container">
+
     <div class="top-bar">
-    <button onclick="goBack()">← Back to Dashboard</button>
-</div>
-<h1>Patient Care Report</h1>
+        <button onclick="goBack()">← Back to Dashboard</button>
+    </div>
+
+    <h1>Patient Care Report</h1>
 
 <form id="patientForm">
 
 
 <table>
-<tr class="section-title"><td colspan="4">Section 1: Pre-care information</td></tr>
-
-<tr>
-<td>Incident date:</td>
-<td><input type="date" name="incident_date"></td>
-<td>Incident number:</td>
-<td><input type="text" name="incident_number"></td>
+<tr class="section-title">
+<td colspan="4">Section 1: Pre-care information</td>
 </tr>
 
 <tr>
-<td>Incident address:</td>
-<td><input type="text" name="incident_address"></td>
-<td>Incident city:</td>
-<td><input type="text" name="incident_city"></td>
+<td>Accident date:</td>
+<td><input type="date" name="accident_date"></td>
+
+<td>Accident #:</td>
+<td><input type="text" name="accident_number" id="accident_number" readonly></td>
 </tr>
 
 <tr>
-<td>Incident state:</td>
-<td><input type="text" name="incident_state"></td>
+<td>Accident address:</td>
+<td>
+
+<input type="text"
+name="accident_address"
+id="accident_address"
+placeholder="Type location (e.g. San Fabian)"
+style="margin-bottom:5px;">
+
+<br>
+
+<button type="button" onclick="showMap()">📍 Plot Location</button>
+
+<div id="map" style="height:300px;margin-top:10px; display:none;"></div>
+
+</td>
+
+<td>Accident city:</td>
+<td><input type="text" name="accident_city"></td>
+</tr>
+
+<tr>
+<td>Accident state:</td>
+<td><input type="text" name="accident_state"></td>
+
 <td>Area/zip code:</td>
 <td><input type="text" name="zip_code"></td>
 </tr>
 
 <tr>
-<td>Incidence location type:</td>
-<td colspan="3"><input type="text" name="location_type"></td>
+<td>Accident location type:</td>
+<td colspan="3">
+
+<select name="location_type" id="location_type" onchange="toggleOtherLocation()">
+<option value="">Select Location Type</option>
+<option value="Highway">Highway</option>
+<option value="Residential Area">Residential Area</option>
+<option value="Commercial Area">Commercial Area</option>
+<option value="School">School</option>
+<option value="Hospital">Hospital</option>
+<option value="Others">Others</option>
+</select>
+
+<input type="text"
+id="other_location_type"
+name="other_location_type"
+placeholder="Specify other location..."
+style="display:none; margin-top:5px;">
+
+</td>
 </tr>
 </table>
 
@@ -72,13 +115,13 @@ Chief complaint:
 <tr>
 <td>Dispatch vehicle number:</td>
 <td><input type="text" name="vehicle_number"></td>
+
 <td>Officer name:</td>
 <td><input type="text" name="officer_name"></td>
 </tr>
 
 <tr>
-<td><input type="text" name="officer_signature"></td>
-<td>Date:</td>
+<td>Officer Date:</td>
 <td><input type="date" name="officer_date"></td>
 </tr>
 </table>
@@ -95,13 +138,22 @@ Chief complaint:
 <tr>
 <td>Date of birth:</td>
 <td><input type="date" name="dob"></td>
+
 <td>Age:</td>
 <td><input type="number" name="age"></td>
 </tr>
 
 <tr>
 <td>Gender:</td>
-<td><input type="text" name="gender"></td>
+<td>
+<select name="gender">
+<option value="">Select Gender</option>
+<option value="Male">Male</option>
+<option value="Female">Female</option>
+<option value="Other">Other</option>
+</select>
+</td>
+
 <td>SSN:</td>
 <td><input type="text" name="ssn"></td>
 </tr>
@@ -119,6 +171,7 @@ Chief complaint:
 <tr>
 <td>Medications:</td>
 <td><textarea name="medications"></textarea></td>
+
 <td>Allergies:</td>
 <td><textarea name="allergies"></textarea></td>
 </tr>
@@ -126,6 +179,7 @@ Chief complaint:
 <tr>
 <td>Chief complaint:</td>
 <td><textarea name="patient_complaint"></textarea></td>
+
 <td>Notes:</td>
 <td><textarea name="notes"></textarea></td>
 </tr>
@@ -138,6 +192,7 @@ Chief complaint:
 <tr>
 <td>Blood pressure:</td>
 <td><input type="text" name="blood_pressure"></td>
+
 <td>Pulse:</td>
 <td><input type="number" name="pulse"></td>
 </tr>
@@ -145,6 +200,7 @@ Chief complaint:
 <tr>
 <td>Respiration:</td>
 <td><input type="text" name="respiration"></td>
+
 <td>Notes:</td>
 <td><textarea name="vital_notes"></textarea></td>
 </tr>
@@ -214,6 +270,7 @@ Chief complaint:
 </form>
 </div>
 
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script src="../jsFiles/carereport.js"></script>
 
 <script>
@@ -221,7 +278,6 @@ function goBack() {
     window.location.href = "../htmlFiles/main.html";
 }
 </script>
-
 
 </body>
 </html>
