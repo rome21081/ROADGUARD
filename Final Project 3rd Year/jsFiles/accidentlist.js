@@ -6,16 +6,47 @@ let accidents = [];
 let currentPage = 1;
 const itemsPerPage = 5;
 
-// Fetch accidents from API
+// Fetch accidents and incidents and merge them
 async function fetchAccidents() {
   try {
-    const res = await fetch('../htmlFiles/accident.json');
-    const data = await res.json();
-    accidents = data;
+    // Fetch both JSON files
+    const [accRes, incRes] = await Promise.all([
+      fetch('../htmlFiles/accident.json'),
+      fetch('../htmlFiles/incident.json')
+    ]);
+
+    const accidentData = await accRes.json();
+    const incidentData = await incRes.json();
+
+    // Normalize incidents to match accident structure
+    const normalizedIncidents = incidentData.map(inc => ({
+      accident_id: inc.incident_id,
+      case_number: inc.case_number,
+      accident_date: inc.incident_date,
+      address: inc.address,
+      severity: inc.severity,
+      description: inc.description,
+      images: inc.images || []
+    }));
+
+    // Normalize accidents (already mostly compatible)
+    const normalizedAccidents = accidentData.map(acc => ({
+      accident_id: acc.accident_id,
+      case_number: acc.case_number,
+      accident_date: acc.accident_date,
+      address: acc.address,
+      severity: acc.severity,
+      description: acc.description,
+      images: acc.images || []
+    }));
+
+    // Merge both arrays
+    accidents = [...normalizedAccidents, ...normalizedIncidents];
+
     renderPage();
   } catch (err) {
-    console.error("Error fetching accidents:", err);
-    accidentListEl.innerHTML = "<p class='text-danger'>Failed to load accidents.</p>";
+    console.error("Error fetching accidents or incidents:", err);
+    accidentListEl.innerHTML = "<p class='text-danger'>Failed to load data.</p>";
   }
 }
 
@@ -39,12 +70,16 @@ function renderPage() {
       case "minor": severityClass = "severity-Minor"; break;
       case "serious": severityClass = "severity-Serious"; break;
       case "fatal": severityClass = "severity-Fatal"; break;
+      case "moderate": severityClass = "severity-Moderate"; break;
       default: severityClass = "severity-NoInjury";
     }
+
+    const imageSrc = acc.images.length > 0 ? acc.images[0].file_path : "";
 
     const card = document.createElement("div");
     card.className = `accident-card p-3 mb-3 rounded-3 ${severityClass}`;
     card.innerHTML = `
+      ${imageSrc ? `<img src="${imageSrc}" alt="Image" class="accident-img mb-2" style="max-width:100%; border-radius:5px;">` : ""}
       <div class="accident-title">${acc.case_number}</div>
       <div class="accident-location">${acc.address} — ${new Date(acc.accident_date).toLocaleDateString()}</div>
       <div class="accident-severity">Severity: ${acc.severity}</div>
@@ -86,4 +121,5 @@ searchInput.addEventListener("input", () => {
   renderPage();
 });
 
+// Fetch both files on page load
 fetchAccidents();

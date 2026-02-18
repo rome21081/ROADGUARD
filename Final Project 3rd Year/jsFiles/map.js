@@ -1,5 +1,3 @@
-'use strict';
-
 document.addEventListener("DOMContentLoaded", async () => {
   if (typeof getData !== "function") {
     console.error("❌ getData() not found.");
@@ -23,7 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const listContainer = document.createElement("div");
   listContainer.className = "accident-list container mt-4 text-light";
   listContainer.innerHTML = `
-    <h4 class="mb-3">Today's Accidents</h4>
+    <h4 class="mb-3">Today's Accidents & Incidents</h4>
     <div id="accidentRows"></div>
   `;
   wrapper.appendChild(listContainer);
@@ -34,9 +32,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Load API + Local JSON
     // ----------------------------------------------------
     let apiData = await getData("accident_api.php");
-    let localData = await fetch("accident.json").then(r => r.json());
 
-    // Normalize
+    // Fetch both local JSON files
+    const [accRes, incRes] = await Promise.all([
+      fetch("accident.json").then(r => r.json()),
+      fetch("incident.json").then(r => r.json())
+    ]);
+
+    // Normalize function
     const normalize = res => {
       if (!res) return [];
       if (Array.isArray(res)) return res;
@@ -47,39 +50,54 @@ document.addEventListener("DOMContentLoaded", async () => {
       return [];
     };
 
+    // Normalize accidents
     let apiAccidents = normalize(apiData);
-    let localAccidents = normalize(localData);
-    let accidents = [...apiAccidents, ...localAccidents];
+    let localAccidents = normalize(accRes);
+
+    // Normalize incidents to match accident structure
+    let localIncidents = normalize(incRes).map(inc => ({
+      accident_id: inc.incident_id,          // map incident_id to accident_id
+      case_number: inc.case_number || "N/A",
+      accident_date: inc.incident_date || inc.accident_date || "N/A",
+      address: inc.address || "Unknown Location",
+      severity: inc.severity || "Minor",
+      description: inc.description || "",
+      vehicles: inc.vehicles || [],
+      images: inc.images || [],
+      latitude: inc.latitude || null,
+      longitude: inc.longitude || null,
+      type_name: inc.type_name || "Incident"
+    }));
+
+    // Merge all data
+    const accidents = [...apiAccidents, ...localAccidents, ...localIncidents];
 
     if (!accidents.length) {
-      list.innerHTML = `<p class="text-muted">No accident reports found.</p>`;
+      list.innerHTML = `<p class="text-muted">No accident or incident reports found.</p>`;
       return;
     }
 
     // ----------------------------------------------------
-    // CREATE MAP MARKERS
+    // CREATE MAP MARKERS & CLUSTERS
     // ----------------------------------------------------
     const markersMap = {};
     const clusterRadius = 300; // meters
     const clusters = [];
 
-    // Helper to calculate distance between two points
     const distance = (lat1, lng1, lat2, lng2) => {
       const R = 6371000; // meters
       const dLat = (lat2 - lat1) * Math.PI / 180;
       const dLng = (lng2 - lng1) * Math.PI / 180;
-      const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLng/2)**2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     };
 
-    // Place markers & assign clusters
     accidents.forEach(a => {
       const lat = parseFloat(a.latitude);
       const lng = parseFloat(a.longitude);
       if (isNaN(lat) || isNaN(lng)) return;
 
-      // Determine marker color
       const sev = (a.severity || "").toLowerCase();
       let fillColor = "#2ecc71";
       if (sev === "severe") fillColor = "#e74c3c";
@@ -96,12 +114,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       let popupContent = `
         <strong>${a.address || "Unknown Location"}</strong><br>
+        <b>Type:</b> ${a.type_name || "N/A"}<br>
         <b>Severity:</b> ${a.severity || "N/A"}<br>
-        <b>Casualties:</b> ${a.casualties || a.number_of_casualties || "N/A"}<br>
-        <b>Description:</b> ${a.description || "No details available."}<br>
+        <b>Description:</b> ${a.description || "No details available"}<br>
       `;
+
       if (Array.isArray(a.vehicles) && a.vehicles.length) {
-        popupContent += `<b>Vehicles:</b> ${a.vehicles.map(v => `${v.brand} ${v.model} (${v.type_name})`).join(", ")}<br>`;
+        popupContent += `<b>Vehicles:</b> ${a.vehicles.map(v => `${v.brand} ${v.model}`).join(", ")}<br>`;
       }
       if (Array.isArray(a.images) && a.images.length) {
         popupContent += `<img src="${a.images[0].file_path}" style="max-width:150px;margin-top:5px;">`;
@@ -121,22 +140,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         const d = distance(lat, lng, cluster.lat, cluster.lng);
         if (d <= clusterRadius) {
           cluster.accidents.push(a);
-          cluster.lat = (cluster.lat * (cluster.accidents.length-1) + lat)/cluster.accidents.length;
-          cluster.lng = (cluster.lng * (cluster.accidents.length-1) + lng)/cluster.accidents.length;
+          cluster.lat = (cluster.lat * (cluster.accidents.length - 1) + lat) / cluster.accidents.length;
+          cluster.lng = (cluster.lng * (cluster.accidents.length - 1) + lng) / cluster.accidents.length;
           addedToCluster = true;
           break;
         }
       }
-      if (!addedToCluster) {
-        clusters.push({lat, lng, accidents: [a]});
-      }
+      if (!addedToCluster) clusters.push({ lat, lng, accidents: [a] });
     });
 
     // ----------------------------------------------------
     // CREATE DANGER ZONES
     // ----------------------------------------------------
     clusters.forEach(cluster => {
-      const sevCounts = {severe: 0, moderate: 0, minor: 0};
+      const sevCounts = { severe: 0, moderate: 0, minor: 0 };
       cluster.accidents.forEach(a => {
         const sev = (a.severity || "minor").toLowerCase();
         if (sevCounts[sev] !== undefined) sevCounts[sev]++;
@@ -146,9 +163,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       const severeRatio = sevCounts["severe"] / totalAccidents;
       const moderateRatio = sevCounts["moderate"] / totalAccidents;
 
-      let zoneColor = "#2ecc71"; // green default
-      if (severeRatio > 0.3) zoneColor = "#e74c3c"; // red
-      else if (moderateRatio > 0.2 || severeRatio > 0) zoneColor = "#f1c40f"; // orange
+      let zoneColor = "#2ecc71";
+      if (severeRatio > 0.3) zoneColor = "#e74c3c";
+      else if (moderateRatio > 0.2 || severeRatio > 0) zoneColor = "#f1c40f";
 
       L.circle([cluster.lat, cluster.lng], {
         radius: clusterRadius,
@@ -156,12 +173,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         weight: 2,
         fillColor: zoneColor,
         fillOpacity: 0.15,
-        interactive: false // do not block individual markers
+        interactive: false
       }).addTo(map);
     });
 
     // ----------------------------------------------------
-    // TODAY'S ACCIDENT LIST
+    // TODAY'S ACCIDENT + INCIDENT LIST
     // ----------------------------------------------------
     const todayStr = new Date().toISOString().split("T")[0];
     let todayCount = 0;
@@ -171,7 +188,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const lat = parseFloat(a.latitude);
       const lng = parseFloat(a.longitude);
       if (isNaN(lat) || isNaN(lng)) return;
-
       if (!a.accident_date?.startsWith(todayStr)) return;
       todayCount++;
 
@@ -179,11 +195,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       item.className = "accident-item mb-3 p-3 bg-dark rounded";
 
       item.innerHTML = `
-        <h5>${a.type_name || "Unknown Accident Type"}</h5>
+        <h5>${a.type_name || "Unknown Type"}</h5>
         <h6>${a.address || "Unknown Location"}</h6>
         <p><strong>Reported:</strong> ${a.accident_date || "Unknown"}</p>
         <p><strong>Severity:</strong> ${a.severity || "N/A"}</p>
-        <p><strong>Casualties:</strong> ${a.casualties || a.number_of_casualties || "0"}</p>
         <p><strong>Description:</strong> ${a.description || "No description provided."}</p>
         <button class="btn btn-sm btn-outline-light mt-2">View on Map</button>
       `;
@@ -197,7 +212,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     if (todayCount === 0) {
-      list.innerHTML = `<p class="text-muted">No accidents reported today.</p>`;
+      list.innerHTML = `<p class="text-muted">No accidents or incidents reported today.</p>`;
     }
 
   } catch (err) {

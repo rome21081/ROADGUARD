@@ -79,6 +79,11 @@
   border-left: 6px solid #00796b;
 }
 
+.severity-Moderate {
+  background: #ffffff; /* blue/green */
+  border-left: 6px solid #00796b;
+}
+
 .severity-Minor {
   background: #fff9c4; /* yellow */
   border-left: 6px solid #fbc02d;
@@ -91,6 +96,11 @@
 
 .severity-Fatal {
   background: #ffebee; /* red */
+  border-left: 6px solid #d32f2f;
+}
+
+.severity-Severe {
+  background: #ff0026; /* red */
   border-left: 6px solid #d32f2f;
 }
 
