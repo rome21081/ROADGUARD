@@ -1,214 +1,222 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Patient Care Report</title>
-    <link rel="stylesheet" href="../cssFiles/carereport.css">
+  <meta charset="UTF-8">
+  <title>Patient Care Report</title>
+  <link rel="stylesheet" href="../cssFiles/carereport.css">
 </head>
 <body>
 
 <div class="container">
-    <div class="top-bar">
+  <div class="top-bar">
     <button onclick="goBack()">← Back to Dashboard</button>
-</div>
-<h1>Patient Care Report</h1>
+  </div>
 
-<form id="patientForm">
+  <h1>Patient Care Report</h1>
 
+  <form id="patientForm">
 
+<!-- ================= RESPONSE INFO ================= -->
 <table>
-<tr class="section-title"><td colspan="4">Section 1: Pre-care information</td></tr>
-
+<tr class="section-title"><td colspan="4">Response Information</td></tr>
 <tr>
-<td>Incident date:</td>
+<td>Response No.:</td>
+<td><input type="text" name="response_no"></td>
+<td>Responding Team:</td>
+<td><input type="text" name="responding_team"></td>
+</tr>
+<tr>
+<td>Vehicle:</td>
+<td><input type="text" name="vehicle"></td>
+<td>Nature of Call:</td>
+<td>
+<label><input type="checkbox" name="nature_call" value="Emergency"> Emergency</label>
+<label><input type="checkbox" name="nature_call" value="Conduction"> Conduction</label>
+</td>
+</tr>
+</table>
+
+<!-- ================= INCIDENT DETAILS ================= -->
+<table>
+<tr class="section-title"><td colspan="4">Incident Details</td></tr>
+<tr>
+<td>Date of Incident:</td>
 <td><input type="date" name="incident_date"></td>
-<td>Incident number:</td>
-<td><input type="text" name="incident_number"></td>
+<td>Time of Incident:</td>
+<td><input type="time" name="incident_time"></td>
 </tr>
-
 <tr>
-<td>Incident address:</td>
-<td><input type="text" name="incident_address"></td>
-<td>Incident city:</td>
-<td><input type="text" name="incident_city"></td>
+<td>Place of Incident:</td>
+<td colspan="3"><input type="text" name="incident_place"></td>
 </tr>
-
 <tr>
-<td>Incident state:</td>
-<td><input type="text" name="incident_state"></td>
-<td>Area/zip code:</td>
-<td><input type="text" name="zip_code"></td>
+<td>Arrival at Scene:</td>
+<td><input type="time" name="arrival_scene"></td>
+<td>Departure from Scene:</td>
+<td><input type="time" name="departure_scene"></td>
 </tr>
-
 <tr>
-<td>Incidence location type:</td>
-<td colspan="3"><input type="text" name="location_type"></td>
+<td>Arrival at Hospital:</td>
+<td><input type="time" name="arrival_hospital"></td>
+<td>Back to Base:</td>
+<td><input type="time" name="back_to_base"></td>
 </tr>
 </table>
 
-
+<!-- ================= PATIENT INFO ================= -->
 <table>
-<tr class="section-title"><td colspan="4">Section 2: Emergency services</td></tr>
-
+<tr class="section-title"><td colspan="4">Patient Information</td></tr>
 <tr>
-<td colspan="2">
-<label><input type="checkbox" name="dispatch" value="No"> No</label><br>
-<label><input type="checkbox" name="dispatch" value="Pre-arrival by bystanders"> Pre-arrival by bystanders</label><br>
-<label><input type="checkbox" name="dispatch" value="On-arrival by emergency services"> On-arrival by emergency services</label>
-</td>
-
-<td colspan="2">
-Dispatch details:
-<textarea name="dispatch_details"></textarea>
-</td>
-</tr>
-
-<tr>
-<td colspan="4">
-Chief complaint:
-<textarea name="chief_complaint"></textarea>
-</td>
-</tr>
-
-<tr>
-<td>Dispatch vehicle number:</td>
-<td><input type="text" name="vehicle_number"></td>
-<td>Officer name:</td>
-<td><input type="text" name="officer_name"></td>
-</tr>
-
-<tr>
-<td><input type="text" name="officer_signature"></td>
-<td>Date:</td>
-<td><input type="date" name="officer_date"></td>
-</tr>
-</table>
-
-
-<table>
-<tr class="section-title"><td colspan="4">Section 3: Patient information</td></tr>
-
-<tr>
-<td>Name:</td>
+<td>Patient Name:</td>
 <td colspan="3"><input type="text" name="patient_name"></td>
 </tr>
-
 <tr>
-<td>Date of birth:</td>
-<td><input type="date" name="dob"></td>
 <td>Age:</td>
 <td><input type="number" name="age"></td>
+<td>Birthday:</td>
+<td><input type="date" name="birthday"></td>
 </tr>
-
 <tr>
 <td>Gender:</td>
 <td><input type="text" name="gender"></td>
-<td>SSN:</td>
-<td><input type="text" name="ssn"></td>
+<td>Civil Status:</td>
+<td><input type="text" name="civil_status"></td>
+</tr>
+<tr>
+<td>Address:</td>
+<td colspan="3"><input type="text" name="address"></td>
+</tr>
+<tr>
+<td>Contact Person:</td>
+<td><input type="text" name="contact_person"></td>
+<td>Contact Number:</td>
+<td><input type="text" name="contact_number"></td>
 </tr>
 </table>
 
-
+<!-- ================= TRIAGE ================= -->
 <table>
-<tr class="section-title"><td colspan="4">Section 4: Patient health status</td></tr>
-
+<tr class="section-title"><td colspan="4">Triage & Emergency Type</td></tr>
 <tr>
-<td>Medical history:</td>
-<td colspan="3"><textarea name="history"></textarea></td>
-</tr>
-
-<tr>
-<td>Medications:</td>
-<td><textarea name="medications"></textarea></td>
-<td>Allergies:</td>
-<td><textarea name="allergies"></textarea></td>
-</tr>
-
-<tr>
-<td>Chief complaint:</td>
-<td><textarea name="patient_complaint"></textarea></td>
-<td>Notes:</td>
-<td><textarea name="notes"></textarea></td>
-</tr>
-</table>
-
-
-<table>
-<tr class="section-title"><td colspan="4">Section 5: Vital signs</td></tr>
-
-<tr>
-<td>Blood pressure:</td>
-<td><input type="text" name="blood_pressure"></td>
-<td>Pulse:</td>
-<td><input type="number" name="pulse"></td>
-</tr>
-
-<tr>
-<td>Respiration:</td>
-<td><input type="text" name="respiration"></td>
-<td>Notes:</td>
-<td><textarea name="vital_notes"></textarea></td>
-</tr>
-</table>
-
-
-<table>
-<tr class="section-title"><td colspan="4">Section 6: Physical examination</td></tr>
-
-<tr>
-<td colspan="4">
-<label><input type="radio" name="injury_present" value="Yes"> Yes</label>
-<label><input type="radio" name="injury_present" value="No"> No</label>
+<td>Triage:</td>
+<td colspan="3">
+<label><input type="radio" name="triage" value="Red"> Red</label>
+<label><input type="radio" name="triage" value="Yellow"> Yellow</label>
+<label><input type="radio" name="triage" value="Green"> Green</label>
+<label><input type="radio" name="triage" value="Black"> Black</label>
 </td>
 </tr>
-
 <tr>
-<td>Cause of injury:</td>
-<td colspan="3"><textarea name="injury_cause"></textarea></td>
+<td>Type of Emergency:</td>
+<td colspan="3">
+<label><input type="checkbox" name="emergency_type" value="Medical"> Medical</label>
+<label><input type="checkbox" name="emergency_type" value="Trauma"> Trauma</label>
+<label><input type="checkbox" name="emergency_type" value="Psychiatric"> Psychiatric</label>
+<label><input type="checkbox" name="emergency_type" value="Obstetrical"> Obstetrical</label>
+<label><input type="checkbox" name="emergency_type" value="Drowning"> Drowning</label>
+</td>
 </tr>
 </table>
 
-
+<!-- ================= MEDICAL INFO ================= -->
 <table>
-<tr class="section-title"><td colspan="4">Section 7: Diagnosis</td></tr>
-
+<tr class="section-title"><td colspan="4">Medical Information</td></tr>
 <tr>
-<td>Diagnosis:</td>
-<td colspan="3"><textarea name="diagnosis"></textarea></td>
+<td>Chief Complaint:</td>
+<td colspan="3"><textarea name="chief_complaint"></textarea></td>
+</tr>
+<tr>
+<td>Medical History:</td>
+<td colspan="3"><textarea name="medical_history"></textarea></td>
+</tr>
+<tr>
+<td>Allergies:</td>
+<td><textarea name="allergies"></textarea></td>
+<td>Medications:</td>
+<td><textarea name="medications"></textarea></td>
 </tr>
 </table>
 
-
+<!-- ================= VITAL SIGNS ================= -->
 <table>
-<tr class="section-title"><td colspan="4">Section 8: Treatment</td></tr>
-
+<tr class="section-title"><td colspan="4">Vital Signs</td></tr>
 <tr>
-<td>Treatment:</td>
-<td colspan="3"><textarea name="treatment"></textarea></td>
+<td>Blood Pressure (mmHg):</td>
+<td><input type="text" name="blood_pressure"></td>
+<td>Pulse Rate (BPM):</td>
+<td><input type="number" name="pulse_rate"></td>
 </tr>
-
 <tr>
-<td>Medication:</td>
-<td colspan="3"><textarea name="medication"></textarea></td>
+<td>Respiratory Rate (CPM):</td>
+<td><input type="number" name="respiratory_rate"></td>
+<td>Temperature (°C):</td>
+<td><input type="number" step="0.1" name="temperature"></td>
+</tr>
+<tr>
+<td>Oxygen Saturation (%):</td>
+<td><input type="number" name="oxygen_saturation"></td>
+<td>Time Taken:</td>
+<td><input type="time" name="vital_time"></td>
 </tr>
 </table>
 
-
+<!-- ================= GCS ================= -->
 <table>
-<tr class="section-title"><td colspan="4">Section 9: Summary</td></tr>
-
+<tr class="section-title"><td colspan="4">Glasgow Coma Scale (GCS)</td></tr>
 <tr>
-<td>Summary:</td>
-<td colspan="3"><textarea name="summary"></textarea></td>
+<td>Eye Response (1–4):</td>
+<td><input type="number" min="1" max="4" name="gcs_eye"></td>
+<td>Verbal Response (1–5):</td>
+<td><input type="number" min="1" max="5" name="gcs_verbal"></td>
 </tr>
-
 <tr>
-<td>Recommendations:</td>
-<td colspan="3"><textarea name="recommendations"></textarea></td>
+<td>Motor Response (1–6):</td>
+<td><input type="number" min="1" max="6" name="gcs_motor"></td>
+<td>Total GCS:</td>
+<td><input type="number" name="gcs_total"></td>
+</tr>
+</table>
+
+<!-- ================= INTERVENTIONS ================= -->
+<table>
+<tr class="section-title"><td colspan="4">Interventions</td></tr>
+<tr>
+<td colspan="4">
+<label><input type="checkbox" name="interventions" value="C-Collar"> C-Collar</label>
+<label><input type="checkbox" name="interventions" value="Oxygen"> Oxygen</label>
+<label><input type="checkbox" name="interventions" value="CPR"> CPR</label>
+<label><input type="checkbox" name="interventions" value="Suctioning"> Suctioning</label>
+<label><input type="checkbox" name="interventions" value="Splint"> Splint</label>
+<label><input type="checkbox" name="interventions" value="Spine Board"> Spine Board</label>
+</td>
+</tr>
+<tr>
+<td>Others:</td>
+<td colspan="3"><textarea name="intervention_others"></textarea></td>
+</tr>
+</table>
+
+<!-- ================= TRANSFER / WAIVER ================= -->
+<table>
+<tr class="section-title"><td colspan="4">Transfer / Waiver</td></tr>
+<tr>
+<td>Hospital / Facility:</td>
+<td colspan="3"><input type="text" name="hospital"></td>
+</tr>
+<tr>
+<td>Reason for Transfer / Not Admitted:</td>
+<td colspan="3"><textarea name="transfer_reason"></textarea></td>
+</tr>
+<tr>
+<td>Patient Signature:</td>
+<td><input type="text" name="patient_signature"></td>
+<td>Date & Time:</td>
+<td><input type="datetime-local" name="signature_datetime"></td>
 </tr>
 </table>
 
 <div class="btn-container">
-<button type="button" onclick="saveReport()">Save Report</button>
+  <button type="button" onclick="saveReport()">Save Report</button>
 </div>
 
 </form>
@@ -218,10 +226,9 @@ Chief complaint:
 
 <script>
 function goBack() {
-    window.location.href = "../htmlFiles/main.html";
+  window.location.href = "../htmlFiles/main.html";
 }
 </script>
-
 
 </body>
 </html>

@@ -2,75 +2,100 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>R.O.A.D — Management Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>R.O.A.D — EMS Management Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"/>
 
-  <!-- Unicons -->
-  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v3.0.6/css/line.css" />
+  <!-- Icons -->
+  <link rel="stylesheet"
+    href="https://unicons.iconscout.com/release/v3.0.6/css/line.css"/>
 
   <style>
-    body { background:#f8f9fa; padding:20px; font-family:Arial, sans-serif; }
-    h1 { font-size:1.8rem; margin-bottom:20px; color:#0d6efd; }
+    body { background:#f8f9fa; padding:20px; font-family:Arial,sans-serif; }
+    h1 { color:#0d6efd; margin-bottom:20px; }
 
-    .kpi-box { display:flex; align-items:center; justify-content:space-between; padding:20px; background:#fff; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); margin-bottom:15px; }
-    .kpi-icon { font-size:2.5rem; color:#fff; border-radius:50%; padding:10px; display:flex; align-items:center; justify-content:center; width:60px; height:60px; }
-    .kpi-text h3 { margin:0; font-size:1.3rem; }
+    .kpi-box {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:20px; background:#fff; border-radius:8px;
+      box-shadow:0 2px 6px rgba(0,0,0,.1);
+    }
+    .kpi-icon {
+      font-size:2rem; color:#fff; padding:12px;
+      border-radius:50%; width:55px; height:55px;
+      display:flex; align-items:center; justify-content:center;
+    }
 
-    .chart-box { background:#fff; padding:20px; border-radius:8px; margin-bottom:20px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-
-    table { background:#fff; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-    th, td { text-align:center; vertical-align:middle; }
-    th { background:#0d6efd; color:#fff; }
-    tr:hover { background:rgba(13,110,253,0.1); cursor:pointer; }
+    .chart-box {
+      background:#fff; padding:20px; border-radius:8px;
+      box-shadow:0 2px 6px rgba(0,0,0,.1);
+      margin-bottom:20px;
+    }
   </style>
 </head>
+
 <body>
 
-<h1>Accident & Incident Management Dashboard (Demo)</h1>
+<h1>EMS / Rescue Operations Dashboard (Demo)</h1>
 
-<!-- KPI Summary -->
+<!-- KPI SUMMARY -->
 <div class="row mb-4">
   <div class="col-md-3">
     <div class="kpi-box">
-      <div class="kpi-icon" style="background:#dc3545;"><i class="uil-exclamation-circle"></i></div>
-      <div class="kpi-text"><h3 id="totalAccidents">0</h3><span>Total Accidents</span></div>
+      <div class="kpi-icon" style="background:#dc3545"><i class="uil-ambulance"></i></div>
+      <div><h3 id="totalCases">0</h3><small>Total Responses</small></div>
     </div>
   </div>
+
   <div class="col-md-3">
     <div class="kpi-box">
-      <div class="kpi-icon" style="background:#ffc107;"><i class="uil-warning"></i></div>
-      <div class="kpi-text"><h3 id="seriousAccidents">0</h3><span>Serious Accidents</span></div>
+      <div class="kpi-icon" style="background:#0d6efd"><i class="uil-heartbeat"></i></div>
+      <div><h3 id="medicalCases">0</h3><small>Medical</small></div>
     </div>
   </div>
+
   <div class="col-md-3">
     <div class="kpi-box">
-      <div class="kpi-icon" style="background:#198754;"><i class="uil-map-marker-plus"></i></div>
-      <div class="kpi-text"><h3 id="activeZones">0</h3><span>Active Zones</span></div>
+      <div class="kpi-icon" style="background:#ffc107"><i class="uil-exclamation-circle"></i></div>
+      <div><h3 id="traumaCases">0</h3><small>Trauma</small></div>
     </div>
   </div>
+
   <div class="col-md-3">
     <div class="kpi-box">
-      <div class="kpi-icon" style="background:#0d6efd;"><i class="uil-user"></i></div>
-      <div class="kpi-text"><h3 id="affectedPeople">0</h3><span>Affected People</span></div>
+      <div class="kpi-icon" style="background:#198754"><i class="uil-location-point"></i></div>
+      <div><h3 id="conductionCases">0</h3><small>Conduction</small></div>
     </div>
   </div>
 </div>
 
-<!-- Charts -->
-<div class="row" id="charts-container">
-  <div class="col-md-4"><div class="chart-box"><canvas id="accidentTypeChart"></canvas></div></div>
-  <div class="col-md-4"><div class="chart-box"><canvas id="severityChart"></canvas></div></div>
-  <div class="col-md-4"><div class="chart-box"><canvas id="monthlyChart"></canvas></div></div>
+<!-- CHARTS -->
+<div class="row">
+  <div class="col-md-6">
+    <div class="chart-box">
+      <canvas id="categoryChart"></canvas>
+    </div>
+  </div>
 
-  <div class="col-md-4"><div class="chart-box"><canvas id="timeChart"></canvas></div></div>
-  <div class="col-md-4"><div class="chart-box"><canvas id="ageChart"></canvas></div></div>
-  <div class="col-md-4"><div class="chart-box"><canvas id="locationChart"></canvas></div></div>
+  <div class="col-md-6">
+    <div class="chart-box">
+      <canvas id="traumaChart"></canvas>
+    </div>
+  </div>
 
-  <div class="col-md-6"><div class="chart-box"><canvas id="vehicleChart"></canvas></div></div>
-  <div class="col-md-6"><div class="chart-box"><canvas id="roadChart"></canvas></div></div>
+  <div class="col-md-6">
+    <div class="chart-box">
+      <canvas id="medicalChart"></canvas>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="chart-box">
+      <canvas id="conductionChart"></canvas>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.js"></script>
