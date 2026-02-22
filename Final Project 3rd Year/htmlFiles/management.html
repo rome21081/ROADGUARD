@@ -18,20 +18,34 @@
     h1 { color:#0d6efd; margin-bottom:20px; }
 
     .kpi-box {
-      display:flex; justify-content:space-between; align-items:center;
-      padding:20px; background:#fff; border-radius:8px;
+      display:flex; 
+      justify-content:space-between; 
+      align-items:center;
+      padding:20px; 
+      background:#fff; 
+      border-radius:8px;
       box-shadow:0 2px 6px rgba(0,0,0,.1);
     }
+
     .kpi-icon {
-      font-size:2rem; color:#fff; padding:12px;
-      border-radius:50%; width:55px; height:55px;
-      display:flex; align-items:center; justify-content:center;
+      font-size:2rem; 
+      color:#fff; 
+      padding:12px;
+      border-radius:50%; 
+      width:55px; 
+      height:55px;
+      display:flex; 
+      align-items:center; 
+      justify-content:center;
     }
 
     .chart-box {
-      background:#fff; padding:20px; border-radius:8px;
+      background:#fff; 
+      padding:20px; 
+      border-radius:8px;
       box-shadow:0 2px 6px rgba(0,0,0,.1);
       margin-bottom:20px;
+      text-align:center;
     }
   </style>
 </head>
@@ -40,38 +54,58 @@
 
 <h1>EMS / Rescue Operations Dashboard (Demo)</h1>
 
-<!-- KPI SUMMARY -->
+<!-- KPI SUMMARY (UNCHANGED) -->
 <div class="row mb-4">
   <div class="col-md-3">
     <div class="kpi-box">
-      <div class="kpi-icon" style="background:#dc3545"><i class="uil-ambulance"></i></div>
-      <div><h3 id="totalCases">0</h3><small>Total Responses</small></div>
+      <div class="kpi-icon" style="background:#dc3545">
+        <i class="uil-ambulance"></i>
+      </div>
+      <div>
+        <h3 id="totalCases">0</h3>
+        <small>Total Responses</small>
+      </div>
     </div>
   </div>
 
   <div class="col-md-3">
     <div class="kpi-box">
-      <div class="kpi-icon" style="background:#0d6efd"><i class="uil-heartbeat"></i></div>
-      <div><h3 id="medicalCases">0</h3><small>Medical</small></div>
+      <div class="kpi-icon" style="background:#0d6efd">
+        <i class="uil-heartbeat"></i>
+      </div>
+      <div>
+        <h3 id="medicalCases">0</h3>
+        <small>Medical</small>
+      </div>
     </div>
   </div>
 
   <div class="col-md-3">
     <div class="kpi-box">
-      <div class="kpi-icon" style="background:#ffc107"><i class="uil-exclamation-circle"></i></div>
-      <div><h3 id="traumaCases">0</h3><small>Trauma</small></div>
+      <div class="kpi-icon" style="background:#ffc107">
+        <i class="uil-exclamation-circle"></i>
+      </div>
+      <div>
+        <h3 id="traumaCases">0</h3>
+        <small>Trauma</small>
+      </div>
     </div>
   </div>
 
   <div class="col-md-3">
     <div class="kpi-box">
-      <div class="kpi-icon" style="background:#198754"><i class="uil-location-point"></i></div>
-      <div><h3 id="conductionCases">0</h3><small>Conduction</small></div>
+      <div class="kpi-icon" style="background:#198754">
+        <i class="uil-location-point"></i>
+      </div>
+      <div>
+        <h3 id="conductionCases">0</h3>
+        <small>Conduction</small>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- CHARTS -->
+<!-- ORIGINAL CHARTS (UNCHANGED) -->
 <div class="row">
   <div class="col-md-6">
     <div class="chart-box">
@@ -98,7 +132,64 @@
   </div>
 </div>
 
+<hr class="my-4">
+
+<h3>Motor Vehicle Crash Analytics</h3>
+
+<div class="row">
+
+  <div class="col-md-6">
+    <div class="chart-box">
+      <canvas id="mvcChart"></canvas>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="chart-box">
+      <canvas id="vehicleChart"></canvas>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="chart-box">
+      <canvas id="personChart"></canvas>
+    </div>
+  </div>
+
+  <!-- NEW AGE GROUP >4500 / <4500 (Added Only) -->
+  <div class="col-md-6">
+    <div class="chart-box">
+      <canvas id="engineChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- 3 PIE CHARTS TABI TABI SA BABA -->
+<div class="row justify-content-center mt-4">
+
+  <div class="col-md-3">
+    <div class="chart-box">
+      <canvas id="licenseChart"></canvas>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="chart-box">
+      <canvas id="helmetChart"></canvas>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="chart-box">
+      <canvas id="alcoholChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.js"></script>
 <script src="../jsFiles/management-analytics.js"></script>
+
 </body>
 </html>
