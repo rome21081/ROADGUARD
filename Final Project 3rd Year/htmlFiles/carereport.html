@@ -21,6 +21,33 @@
         margin: auto;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
+        
+        
+        table.collapsible-table .section-title {
+          cursor: pointer;
+          background: #f2f2f2;
+          font-weight: bold;
+          user-select: none;
+        }
+
+        
+        table.collapsible-table .collapsed-row {
+          display: none;
+        }
+
+       
+        table.collapsible-table .section-title:first-child::after {
+          content: "➖ "; 
+          float: left; 
+          margin-left: 5px;         
+          font-size: 12px;
+          margin-left: 0px;
+        }
+
+        table.collapsible-table .section-title:first-child.collapsed::after {
+          content: "➕ ";          
+        }
+
     </style>
     </head>
     <body>
@@ -106,23 +133,18 @@
                     <td colspan="2">Place of Incident</td>
                     <td colspan="4"><input type="text" name="incident_place"></td>
                 </tr>
+             </table>
+              <table>
                 <tr>
                     <td>Departure Time</td>
                     <td>Arrival at the Scene</td>
-                    <td>Departure from the Scene</td>
-                    <td>Arrival at Hospital</td>
-                    <td>Departure from Hospital</td>
-                    <td>Back to Base</td>
+                    <td>Departure from the Scene</td>    
                 </tr>
                 <tr>
                     <td><input type="time" name="departure_time"></td>
                     <td><input type="time" name="arrival_scene"></td>
-                    <td><input type="time" name="departure_scene"></td>
-                    <td><input type="time" name="arrival_hospital"></td>
-                    <td><input type="time" name="departure_hospital"></td>
-                    <td><input type="time" name="back_to_base"></td>
+                    <td><input type="time" name="departure_scene"></td>  
                 </tr>
-            
             </table>
                 
         </div>
@@ -251,8 +273,9 @@
                     </td>   
                 </tr>
                 </table>
-                <table>
-                <tr class="section-title"><td colspan="4">Trauma Nature</td></tr>
+                <table class="collapsible-table">
+                <tr>
+                  <th colspan="4" class="section-title">Trauma Nature</th></tr>
                 <tr>
                     <td><input type="checkbox" name="trauma_nature" value="self-inflicted"> Self-Inflicted</td>
                     <td><input type="checkbox" name="trauma_nature" value="accidental"> Accidental</td>
@@ -266,8 +289,9 @@
                     <td><input type="text" name="fall_specify"></td>
                 </tr>
                 </table>
-                <table>
-                <tr class="section-title"><td colspan="4">Motor Vehicle Crash Section</td></tr>
+                <table class="collapsible-table">
+                <tr>
+                  <th colspan="4" class="section-title">Motor Vehicle Crash Section</th></tr>
                 <tr>
                     <td colspan="2"><input type="radio" name="motor_vehicle_crash_type" value="self-accident"> Self-Accident</td>
                     <td colspan="2"><input type="radio" name="motor_vehicle_crash_type" value="collision"> Collision</td>
@@ -294,8 +318,9 @@
                         <input type="radio" name="drivers_licence" value="n/a"> N/A</td>
                 </tr>
                 </table>
-                <table>
-                    <tr class="section-title"><td colspan="4">Chief Complaint/Initial Assessment</td></tr>
+                <table class="collapsible-table">
+                    <tr>
+                      <th colspan="4" class="section-title">Chief Complaint/Initial Assessment</th></tr>
                     <tr>
                         <td colspan="4"><textarea name="chief_complaint" placeholder="Chief Complaint/Initial Assessment"></textarea></td>
                     </tr>
@@ -336,9 +361,9 @@
                         <td><input type="text" name="oxygen_saturation2"></td>
                         <td><input type="text" name="oxygen_saturation3"></td>
                     </tr>
-                <table>
-                <tr class="section-title">
-                    <td colspan="4">Glasgow Coma Scale (GCS)</td>
+                <table class="collapsible-table">
+                <tr>
+                    <td colspan="4" class="section-title">Glasgow Coma Scale (GCS)</td>
                 </tr>
                 <tr>
                     <td>Eye Response (1–4):</td>
@@ -362,10 +387,10 @@
                 </tr>
                 </table>
                 <!-- AIRWAY & BREATHING -->
-                <table>
-                <tr class="section-title">
-                    <td colspan="2" class="section-title">AIRWAY</td>
-                    <td colspan="2" class="section-title">BREATHING</td>
+                <table class="collapsible-table">
+                <tr>
+                    <th colspan="2" class="section-title">AIRWAY</th>
+                    <th colspan="2" class="section-title">BREATHING</th>
                 </tr>
                 <tr>
                     <td colspan="2">
@@ -389,9 +414,9 @@
                 </table>
 
                 <!-- CIRCULATION -->
-                <table>
-                <tr class="section-title">
-                    <td colspan="4" class="section-title">CIRCULATION</td>
+                <table class="collapsible-table">
+                <tr>
+                    <th colspan="4" class="section-title">CIRCULATION</th>
                 </tr>
                 <tr>
                     <td>
@@ -426,9 +451,9 @@
                 </table>
 
                 <!-- PAIN ASSESSMENT -->
-                <table>
-                <tr class="section-title">
-                    <td colspan="2" class="section-title">PAIN ASSESSMENT</td>
+                <table class="collapsible-table">
+                <tr>
+                    <th colspan="2" class="section-title">PAIN ASSESSMENT</th>
                 </tr>
                 <tr>
                     <td>
@@ -450,10 +475,10 @@
                 </table>
 
                 <!-- ALLERGIES & MEDICATIONS -->
-                <table>
-                <tr class="section-title">
-                    <td class="section-title">ALLERGIES</td>
-                    <td class="section-title">MEDICATIONS</td>
+                <table class="collapsible-table">
+                <tr>
+                    <th class="section-title">ALLERGIES</th>
+                    <th class="section-title">MEDICATIONS</th>
                 </tr>
                 <tr>
                     <td>
@@ -474,9 +499,9 @@
                 </table>
 
                 <!-- MEDICAL HISTORY -->
-                <table>
-                <tr class="section-title">
-                    <td colspan="2" class="section-title">MEDICAL HISTORY</td>
+                <table class="collapsible-table">
+                <tr>
+                    <th colspan="2" class="section-title">MEDICAL HISTORY</th>
                 </tr>
                 <tr>
                     <td>
@@ -494,10 +519,10 @@
                 </table>
 
                 <!-- LIFESTYLE -->
-                <table>
-                <tr class="section-title">
-                    <td class="section-title">SMOKING</td>
-                    <td class="section-title">ALCOHOL</td>
+                <table class="collapsible-table">
+                <tr>
+                    <th class="section-title">SMOKING</th>
+                    <th class="section-title">ALCOHOL</th>
                 </tr>
                 <tr>
                     <td>
@@ -515,7 +540,7 @@
                 </table>
 
                 <!-- INTERVENTIONS -->
-                <table>
+                <table class="collapsible-table">
                 <tr>
                     <th colspan="3" class="section-title">INTERVENTIONS</th>
                 </tr>
@@ -579,6 +604,18 @@
                 <td><input type="datetime-local" name="signature_datetime"></td>
             </tr>
             </table>
+            <table>
+            <tr>
+                <td>Arrival at Hospital</td>
+                <td>Departure from Hospital</td>
+                <td>Back to Base</td>
+            </tr>
+            <tr>
+                <td><input type="time" name="arrival_hospital"></td>
+                <td><input type="time" name="departure_hospital"></td>
+                <td><input type="time" name="back_to_base"></td>
+            </tr>
+            </table>
         </div>
 
         <div class="nav-buttons">
@@ -620,6 +657,28 @@
     document.getElementById("gcs_eye").addEventListener("input", calculateGCS);
     document.getElementById("gcs_verbal").addEventListener("input", calculateGCS);
     document.getElementById("gcs_motor").addEventListener("input", calculateGCS);
+    </script>
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll("table.collapsible-table").forEach(table => {
+        const headerRow = table.querySelector(".section-title");
+        if (!headerRow) return;
+
+        // all rows except the title
+        const rows = Array.from(table.rows).slice(1);
+
+        // START COLLAPSED (remove this block if you want open by default)
+        // rows.forEach(row => row.classList.add("collapsed-row"));
+        // headerRow.classList.add("collapsed");
+
+        headerRow.addEventListener("click", () => {
+          const isCollapsed = headerRow.classList.toggle("collapsed");
+          rows.forEach(row => {
+            row.classList.toggle("collapsed-row", isCollapsed);
+          });
+        });
+      });
+    });
     </script>   
 
     </body>
