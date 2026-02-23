@@ -1,277 +1,269 @@
-// ==============================
-// FAKE EMS / RESCUE AGENCY DATA
-// ==============================
+Chart.defaults.global.defaultFontColor = "#ffffff";
+let charts = [];
 
-const allData = [
+const allData = [];
 
-  // TRAUMA
-  { category:"Trauma", sub_type:"Fall" },
-  { category:"Trauma", sub_type:"Fall" },
-  { category:"Trauma", sub_type:"Domestic Violence" },
-  { category:"Trauma", sub_type:"Water Rescue Incident" },
-  { category:"Trauma", sub_type:"Fire Rescue Incident" },
-  { category:"Trauma", sub_type:"Electrocution" },
+// Generate 200 realistic records
+for(let i=0;i<200;i++){
+let today=new Date();
+let randomDate=new Date(today.getFullYear(),Math.floor(Math.random()*12),Math.floor(Math.random()*28)+1);
 
-  // MEDICAL
-  { category:"Medical", sub_type:"Pediatric" },
-  { category:"Medical", sub_type:"Psychiatric" },
-  { category:"Medical", sub_type:"Surgical" },
-  { category:"Medical", sub_type:"Obstetrical" },
+const categories=["Medical","Trauma","Conduction","Motor Vehicle Crash"];
+const medicalTypes=["Pediatric","Psychiatric","Surgical","Obstetrical"];
+const traumaTypes=["Fall","Electrocution","Domestic Violence","Fire Rescue Incident"];
+const conductionTypes=["Dialysis","Check-up","Travel (Within Region 2)","Travel (Outside Region 2)"];
+const mvcTypes=["Collision","Self-Accident"];
+const vehicles=["Single Motor","Tricycle","Bicycle"];
+const persons=["Driver","Passenger","Pedestrian"];
+const engineSize=[">4500","<4500"];
+const binary=["+","-"];
 
-  // CONDUCTION
-  { category:"Conduction", sub_type:"Dialysis" },
-  { category:"Conduction", sub_type:"Check-up" },
-  { category:"Conduction", sub_type:"Travel (Within Region 2)" },
+let category=categories[Math.floor(Math.random()*4)];
+let obj={category:category,date:randomDate};
 
-  // MOTOR VEHICLE CRASH
-  { category:"Motor Vehicle Crash", sub_type:"Self-Accident", vehicle:"Single Motor", person:"Driver", license:"+", helmet:"+", alcohol:"-" },
-  { category:"Motor Vehicle Crash", sub_type:"Collision", vehicle:"Tricycle", person:"Passenger", license:"+", helmet:"-", alcohol:"-" },
-  { category:"Motor Vehicle Crash", sub_type:"Self-Accident", vehicle:"Bicycle", person:"Driver", license:"-", helmet:"-", alcohol:"+" },
-  { category:"Motor Vehicle Crash", sub_type:"Collision", vehicle:"Single Motor", person:"Driver", license:"+", helmet:"+", alcohol:"-" },
-  { category:"Motor Vehicle Crash", sub_type:"Collision", vehicle:"Tricycle", person:"Pedestrian", license:"-", helmet:"-", alcohol:"+" }
-];
+if(category==="Medical") obj.sub_type=medicalTypes[Math.floor(Math.random()*4)];
+if(category==="Trauma") obj.sub_type=traumaTypes[Math.floor(Math.random()*4)];
+if(category==="Conduction") obj.sub_type=conductionTypes[Math.floor(Math.random()*4)];
 
-// ==============================
-// ANALYTICS WITH RANDOM WEIGHT
-// ==============================
-
-function computeAnalytics(data){
-
-  const categoryCount = {};
-  const breakdown = {
-    Trauma:{},
-    Medical:{},
-    Conduction:{},
-    "Motor Vehicle Crash":{}
-  };
-
-  const vehicleCount = {};
-  const personCount = {};
-  const licenseCount = {};
-  const helmetCount = {};
-  const alcoholCount = {};
-
-  data.forEach(item=>{
-
-    // RANDOM weight 1–6
-    let weight = Math.floor(Math.random() * 6) + 1;
-
-    categoryCount[item.category] =
-      (categoryCount[item.category] || 0) + weight;
-
-    breakdown[item.category][item.sub_type] =
-      (breakdown[item.category][item.sub_type] || 0) + weight;
-
-    if(item.category === "Motor Vehicle Crash"){
-
-      vehicleCount[item.vehicle] =
-        (vehicleCount[item.vehicle] || 0) + weight;
-
-      personCount[item.person] =
-        (personCount[item.person] || 0) + weight;
-
-      licenseCount[item.license] =
-        (licenseCount[item.license] || 0) + weight;
-
-      helmetCount[item.helmet] =
-        (helmetCount[item.helmet] || 0) + weight;
-
-      alcoholCount[item.alcohol] =
-        (alcoholCount[item.alcohol] || 0) + weight;
-    }
-
-  });
-
-  return {
-    categoryCount,
-    breakdown,
-    vehicleCount,
-    personCount,
-    licenseCount,
-    helmetCount,
-    alcoholCount
-  };
+if(category==="Motor Vehicle Crash"){
+obj.sub_type=mvcTypes[Math.floor(Math.random()*2)];
+obj.vehicle=vehicles[Math.floor(Math.random()*3)];
+obj.person=persons[Math.floor(Math.random()*3)];
+obj.engine=engineSize[Math.floor(Math.random()*2)];
+obj.license=binary[Math.floor(Math.random()*2)];
+obj.helmet=binary[Math.floor(Math.random()*2)];
+obj.alcohol=binary[Math.floor(Math.random()*2)];
 }
 
-const analytics = computeAnalytics(allData);
+allData.push(obj);
+}
 
-// ==============================
-// KPI VALUES
-// ==============================
-
-document.getElementById("totalCases").innerText = 
-  Object.values(analytics.categoryCount).reduce((a,b)=>a+b,0);
-
-document.getElementById("medicalCases").innerText = analytics.categoryCount.Medical || 0;
-document.getElementById("traumaCases").innerText = analytics.categoryCount.Trauma || 0;
-document.getElementById("conductionCases").innerText = analytics.categoryCount.Conduction || 0;
-
-
-// ==============================
-// CHARTS
-// ==============================
-
-// CATEGORY PIE
-new Chart(document.getElementById("categoryChart"), {
-  type:'pie',
-  data:{
-    labels:Object.keys(analytics.categoryCount),
-    datasets:[{
-      data:Object.values(analytics.categoryCount),
-      backgroundColor:["#dc3545","#0d6efd","#198754","#6f42c1"]
-    }]
-  }
+function filterByDate(data){
+const f=document.getElementById("filterType").value;
+const today=new Date();
+return data.filter(d=>{
+let dt=new Date(d.date);
+if(f==="day") return dt.toDateString()===today.toDateString();
+if(f==="month") return dt.getMonth()===today.getMonth();
+if(f==="year") return dt.getFullYear()===today.getFullYear();
+return true;
 });
+}
 
-// TRAUMA
-new Chart(document.getElementById("traumaChart"), {
-  type:'bar',
-  data:{
-    labels:Object.keys(analytics.breakdown.Trauma),
-    datasets:[{
-      data:Object.values(analytics.breakdown.Trauma),
-      backgroundColor:"#dc3545"
-    }]
-  },
-  options:{ legend:{display:false} }
+function countBy(data,key){
+let obj={};
+data.forEach(d=>{
+if(d[key]) obj[d[key]]=(obj[d[key]]||0)+1;
 });
+return obj;
+}
 
-// MEDICAL
-new Chart(document.getElementById("medicalChart"), {
-  type:'bar',
-  data:{
-    labels:Object.keys(analytics.breakdown.Medical),
-    datasets:[{
-      data:Object.values(analytics.breakdown.Medical),
-      backgroundColor:"#0d6efd"
-    }]
-  },
-  options:{ legend:{display:false} }
-});
+function percentFormatter(value,context){
+let total=context.dataset.data.reduce((a,b)=>a+b,0);
+let percent=((value/total)*100).toFixed(1);
+return percent+"%";
+}
 
-// CONDUCTION
-new Chart(document.getElementById("conductionChart"), {
-  type:'bar',
-  data:{
-    labels:Object.keys(analytics.breakdown.Conduction),
-    datasets:[{
-      data:Object.values(analytics.breakdown.Conduction),
-      backgroundColor:"#198754"
-    }]
-  },
-  options:{ legend:{display:false} }
-});
+function render(){
+charts.forEach(c=>c.destroy());
+charts=[];
 
-// MVC TYPE
-new Chart(document.getElementById("mvcChart"), {
-  type:'bar',
-  data:{
-    labels:Object.keys(analytics.breakdown["Motor Vehicle Crash"]),
-    datasets:[{
-      data:Object.values(analytics.breakdown["Motor Vehicle Crash"]),
-      backgroundColor:"#6f42c1"
-    }]
-  },
-  options:{ legend:{display:false} }
-});
+let filtered=filterByDate(allData);
+let categoryCount=countBy(filtered,"category");
 
-// VEHICLE
-new Chart(document.getElementById("vehicleChart"), {
-  type:'bar',
-  data:{
-    labels:Object.keys(analytics.vehicleCount),
-    datasets:[{
-      data:Object.values(analytics.vehicleCount),
-      backgroundColor:"#fd7e14"
-    }]
-  },
-  options:{ legend:{display:false} }
-});
+document.getElementById("totalCases").innerText=filtered.length;
+document.getElementById("medicalCases").innerText=categoryCount.Medical||0;
+document.getElementById("traumaCases").innerText=categoryCount.Trauma||0;
+document.getElementById("conductionCases").innerText=categoryCount.Conduction||0;
 
-// PERSON
-new Chart(document.getElementById("personChart"), {
-  type:'bar',
-  data:{
-    labels:Object.keys(analytics.personCount),
-    datasets:[{
-      data:Object.values(analytics.personCount),
-      backgroundColor:"#20c997"
-    }]
-  },
-  options:{ legend:{display:false} }
-});
-
-// LICENSE
-new Chart(document.getElementById("licenseChart"), {
-  type:'pie',
-  data:{
-    labels:["License (+)","License (-)"],
-    datasets:[{
-      data:[
-        analytics.licenseCount["+"] || 0,
-        analytics.licenseCount["-"] || 0
-      ],
-      backgroundColor:["#198754","#dc3545"]
-    }]
-  }
-});
-
-// HELMET
-new Chart(document.getElementById("helmetChart"), {
-  type:'pie',
-  data:{
-    labels:["Helmet (+)","Helmet (-)"],
-    datasets:[{
-      data:[
-        analytics.helmetCount["+"] || 0,
-        analytics.helmetCount["-"] || 0
-      ],
-      backgroundColor:["#198754","#dc3545"]
-    }]
-  }
-});
-
-// ALCOHOL
-new Chart(document.getElementById("alcoholChart"), {
-  type:'pie',
-  data:{
-    labels:["Alcohol (+)","Alcohol (-)"],
-    datasets:[{
-      data:[
-        analytics.alcoholCount["+"] || 0,
-        analytics.alcoholCount["-"] || 0
-      ],
-      backgroundColor:["#dc3545","#198754"]
-    }]
-  }
-});
-
-// ENGINE SIZE >4500 <4500
-const engineData = {
-  ">4500": 8,
-  "<4500": 5
+const commonBar={
+legend:{display:false},
+plugins:{
+datalabels:{
+color:"#fff",
+anchor:"end",
+align:"top",
+formatter:percentFormatter,
+font:{weight:"bold"}
+}
+},
+scales:{
+xAxes:[{ticks:{fontColor:"#fff"}}],
+yAxes:[{ticks:{beginAtZero:true,fontColor:"#fff"}}]
+}
 };
 
-new Chart(document.getElementById("engineChart"), {
-  type:'bar',
-  data:{
-    labels:Object.keys(engineData),
-    datasets:[{
-      label: "Engine Count",
-      data:Object.values(engineData),
-      backgroundColor:["#0d6efd","#ffc107"],
-      borderColor:["#084298","#b38600"],
-      borderWidth:2
-    }]
-  },
-  options:{
-    legend:{ display:false },
-    scales:{
-      yAxes:[{
-        ticks:{
-          beginAtZero:true
-        }
-      }]
-    }
-  }
+charts.push(new Chart(categoryChart,{
+type:'pie',
+plugins:[ChartDataLabels],
+data:{
+labels:Object.keys(categoryCount),
+datasets:[{
+data:Object.values(categoryCount),
+backgroundColor:["#3b82f6","#ef4444","#10b981","#f59e0b"]
+}]},
+options:{
+plugins:{
+datalabels:{
+color:"#fff",
+formatter:percentFormatter
+}
+}
+}
+}));
+
+["Trauma","Medical","Conduction"].forEach(type=>{
+charts.push(new Chart(document.getElementById(type.toLowerCase()+"Chart"),{
+type:'bar',
+plugins:[ChartDataLabels],
+data:{
+labels:Object.keys(countBy(filtered.filter(d=>d.category===type),"sub_type")),
+datasets:[{
+data:Object.values(countBy(filtered.filter(d=>d.category===type),"sub_type")),
+backgroundColor:"#6366f1"
+}]},
+options:commonBar
+}));
 });
+
+let mvc=filtered.filter(d=>d.category==="Motor Vehicle Crash");
+
+charts.push(new Chart(mvcChart,{
+type:'bar',
+plugins:[ChartDataLabels],
+data:{
+labels:Object.keys(countBy(mvc,"sub_type")),
+datasets:[{
+data:Object.values(countBy(mvc,"sub_type")),
+backgroundColor:"#a855f7"
+}]},
+options:commonBar
+}));
+
+charts.push(new Chart(vehicleChart,{
+type:'bar',
+plugins:[ChartDataLabels],
+data:{
+labels:Object.keys(countBy(mvc,"vehicle")),
+datasets:[{
+data:Object.values(countBy(mvc,"vehicle")),
+backgroundColor:"#f97316"
+}]},
+options:commonBar
+}));
+
+charts.push(new Chart(personChart,{
+type:'bar',
+plugins:[ChartDataLabels],
+data:{
+labels:Object.keys(countBy(mvc,"person")),
+datasets:[{
+data:Object.values(countBy(mvc,"person")),
+backgroundColor:"#14b8a6"
+}]},
+options:commonBar
+}));
+
+charts.push(new Chart(engineChart,{
+type:'bar',
+plugins:[ChartDataLabels],
+data:{
+labels:Object.keys(countBy(mvc,"engine")),
+datasets:[{
+data:Object.values(countBy(mvc,"engine")),
+backgroundColor:["#2563eb","#fbbf24"]
+}]},
+options:commonBar
+}));
+
+charts.push(new Chart(licenseChart,{
+type:'pie',
+plugins:[ChartDataLabels],
+data:{
+labels:["License (+)","License (-)"],
+datasets:[{
+data:[countBy(mvc,"license")["+"]||0,countBy(mvc,"license")["-"]||0],
+backgroundColor:["#22c55e","#ef4444"]
+}]},
+options:{plugins:{datalabels:{color:"#fff",formatter:percentFormatter}}}
+}));
+
+charts.push(new Chart(helmetChart,{
+type:'pie',
+plugins:[ChartDataLabels],
+data:{
+labels:["Helmet (+)","Helmet (-)"],
+datasets:[{
+data:[countBy(mvc,"helmet")["+"]||0,countBy(mvc,"helmet")["-"]||0],
+backgroundColor:["#22c55e","#ef4444"]
+}]},
+options:{plugins:{datalabels:{color:"#fff",formatter:percentFormatter}}}
+}));
+
+charts.push(new Chart(alcoholChart,{
+type:'pie',
+plugins:[ChartDataLabels],
+data:{
+labels:["Alcohol (+)","Alcohol (-)"],
+datasets:[{
+data:[countBy(mvc,"alcohol")["+"]||0,countBy(mvc,"alcohol")["-"]||0],
+backgroundColor:["#ef4444","#22c55e"]
+}]},
+options:{plugins:{datalabels:{color:"#fff",formatter:percentFormatter}}}
+}));
+
+renderSummary(filtered);
+renderMVCSummary(mvc);
+renderMonthlyTrend(filtered);
+}
+
+function renderMonthlyTrend(filtered){
+let monthCounts=new Array(12).fill(0);
+filtered.forEach(d=>{
+let month=new Date(d.date).getMonth();
+monthCounts[month]++;
+});
+
+charts.push(new Chart(monthlyTrendChart,{
+type:'line',
+data:{
+labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+datasets:[{
+label:"Total Incidents",
+data:monthCounts,
+borderColor:"#3b82f6",
+backgroundColor:"rgba(59,130,246,0.2)",
+fill:true
+}]
+}
+}));
+}
+
+function renderSummary(filtered){
+let total=filtered.length;
+let categoryCount=countBy(filtered,"category");
+let tbody=document.getElementById("summaryTable");
+tbody.innerHTML="";
+Object.keys(categoryCount).forEach(cat=>{
+let count=categoryCount[cat];
+let percent=((count/total)*100).toFixed(2);
+tbody.innerHTML+=`<tr><td>${cat}</td><td>${count}</td><td>${percent}%</td></tr>`;
+});
+tbody.innerHTML+=`<tr style="font-weight:bold;"><td>Total</td><td>${total}</td><td>100%</td></tr>`;
+}
+
+function renderMVCSummary(mvc){
+let total=mvc.length;
+let mvcCount=countBy(mvc,"sub_type");
+let tbody=document.getElementById("mvcSummaryTable");
+tbody.innerHTML="";
+Object.keys(mvcCount).forEach(cat=>{
+let count=mvcCount[cat];
+let percent=((count/total)*100).toFixed(2);
+tbody.innerHTML+=`<tr><td>${cat}</td><td>${count}</td><td>${percent}%</td></tr>`;
+});
+tbody.innerHTML+=`<tr style="font-weight:bold;"><td>Total</td><td>${total}</td><td>100%</td></tr>`;
+}
+
+document.getElementById("filterType").addEventListener("change",render);
+render();
