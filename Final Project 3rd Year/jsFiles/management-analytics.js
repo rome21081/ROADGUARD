@@ -1,10 +1,10 @@
 Chart.defaults.global.defaultFontColor = "#ffffff";
 let charts = [];
 
-const allData = [];
+var allData = [];
 
-// Generate 200 realistic records
-for(let i=0;i<200;i++){
+
+for(let i=0;i<500;i++){
 let today=new Date();
 let randomDate=new Date(today.getFullYear(),Math.floor(Math.random()*12),Math.floor(Math.random()*28)+1);
 
@@ -267,3 +267,4 @@ tbody.innerHTML+=`<tr style="font-weight:bold;"><td>Total</td><td>${total}</td><
 
 document.getElementById("filterType").addEventListener("change",render);
 render();
+

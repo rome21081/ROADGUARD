@@ -15,17 +15,59 @@ href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.
 <!-- Chart DataLabels Plugin -->
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
 
-<!-- Excel Export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 
 <style>
 body{
+margin:0;
+font-family: 'Segoe UI', sans-serif;
 background:linear-gradient(135deg,#0f172a,#1e293b);
 color:white;
-padding:25px;
-font-family: 'Segoe UI', sans-serif;
 }
 
+/* SIDEBAR */
+.sidebar{
+position:fixed;
+left:0;
+top:0;
+width:240px;
+height:100vh;
+background:#111827;
+padding:25px 20px;
+overflow-y:auto;
+}
+
+.sidebar-title{
+font-size:22px;
+font-weight:600;
+margin-bottom:30px;
+color:#38bdf8;
+}
+
+.sidebar a{
+display:block;
+padding:12px 0;
+color:#cbd5e1;
+text-decoration:none;
+font-size:15px;
+}
+
+.sidebar a:hover{
+color:#38bdf8;
+}
+
+.sidebar a.active{
+color:#38bdf8;
+font-weight:600;
+}
+
+/* MAIN CONTENT */
+.main-content{
+margin-left:260px;
+padding:25px;
+}
+
+/* YOUR EXISTING STYLES */
 .dashboard-title{
 font-size:26px;
 font-weight:600;
@@ -55,10 +97,6 @@ border:1px solid rgba(255,255,255,0.05);
 box-shadow:0 10px 20px rgba(0,0,0,0.2);
 }
 
-.table{
-color:white;
-}
-
 select.form-control{
 background:#1e293b;
 color:white;
@@ -74,6 +112,20 @@ font-weight:500;
 
 <body>
 
+<!-- SIDEBAR -->
+<div class="sidebar">
+<div class="sidebar-title">R.O.A.D</div>
+
+<a href="../htmlFiles/main.html">Dashboard</a>
+<a href="#" class="active">Management Analytics</a>
+<a href="../htmlFiles/spreedsheet.html">SpreedSheet</a>
+
+</div>
+
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
 <div class="container-fluid">
 
 <div class="dashboard-title">
@@ -87,10 +139,6 @@ EMS / Rescue Operations Dashboard
 <option value="month">This Month</option>
 <option value="year">This Year</option>
 </select>
-
-<button onclick="downloadExcel()" class="btn btn-success mb-4">
-Download Excel Report
-</button>
 
 <!-- KPI CARDS -->
 <div class="row">
@@ -214,7 +262,7 @@ Conduction
 <!-- SUMMARY TABLE -->
 <div class="card-box mt-4">
 <h5>Incident Summary Table</h5>
-<table class="table table-hover mt-3">
+<table class="table table-hover mt-3 text-white">
 <thead>
 <tr>
 <th>Category</th>
@@ -229,7 +277,7 @@ Conduction
 <!-- MVC DETAILED SUMMARY -->
 <div class="card-box mt-4">
 <h5>Motor Vehicle Crash Detailed Summary</h5>
-<table class="table table-hover mt-3">
+<table class="table table-hover mt-3 text-white">
 <thead>
 <tr>
 <th>Type</th>
@@ -241,6 +289,7 @@ Conduction
 </table>
 </div>
 
+</div>
 </div>
 
 <!-- JS FILE -->
