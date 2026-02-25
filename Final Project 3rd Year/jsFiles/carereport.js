@@ -114,7 +114,7 @@ function renderOverview() {
     "Circulation": ["pulse","pulse_strength","capillary_refill","pupils","skin"],
     "Allergies & Medications": ["allergies_status","allergies_food","allergies_drug","allergies_other","medications_status","medications_drug","medications_dose","medications_datetime"],
     "Medical History & Lifestyle": ["medical_history","medical_history_other","smoke","smoke_count","smoke_stopped","alcohol","alcohol_frequency"],
-    "Interventions": ["vital","wound","ccollar","cpr"],
+    "Interventions": ["vital","wound","c-collar","oxygen","cpr","sponge_bath","cold_hot","wood_splints","arm_sling","ked","elastic_triangular","spine_board","endorcement","hoc"],
     "Response & Transport": ["hospital","transfer_reason","patient_signature","signature_datetime"]
   };
 
